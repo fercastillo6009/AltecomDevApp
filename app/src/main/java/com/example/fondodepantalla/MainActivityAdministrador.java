@@ -7,6 +7,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -64,6 +65,13 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
         // Comprobación al iniciar por primera vez
         ComprobandoInicioSesion();
     }
+
+    @SuppressLint("MissingSuperCall")
+    @Override
+    public void onBackPressed() {
+        Toast.makeText(this, "Botón de retroceso deshabilitado", Toast.LENGTH_SHORT).show();
+    }
+
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {

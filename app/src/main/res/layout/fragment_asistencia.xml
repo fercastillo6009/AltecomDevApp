@@ -21,12 +21,14 @@
 
     <!-- Card de información del usuario -->
     <androidx.cardview.widget.CardView
+        android:id="@+id/cardView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:layout_marginBottom="20dp"
         app:cardCornerRadius="16dp"
-        app:cardElevation="6dp">
+        app:cardElevation="6dp"
+        android:visibility="gone"> <!-- Oculto hasta cargar datos -->
 
         <LinearLayout
             android:layout_width="match_parent"

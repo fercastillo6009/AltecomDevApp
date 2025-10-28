@@ -8,11 +8,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.cardview.widget.CardView;
 
 import com.example.fondodepantalla.R;
 import com.google.firebase.auth.FirebaseAuth;
@@ -37,15 +39,16 @@ public class AsistenciaFragment extends Fragment {
     private String uid, nombre, fechaHoy;
     private boolean entradaRegistrada = false;
 
+    // CardView y TextViews
+    private CardView cardView;
+    private TextView tvUserEmail, tvFecha, tvHora, tvEstado;
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_asistencia, container, false);
 
-        // Inicializar
+        // Inicializar LocationHelper y Firebase
         locationHelper = new LocationHelper(requireContext());
-        btnRegistrarEntrada = view.findViewById(R.id.btnRegistrarAsistencia);
-        btnRegistrarSalida = view.findViewById(R.id.btnRegistrarSalida);
-
         db = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
         uid = auth.getCurrentUser().getUid();
@@ -54,9 +57,25 @@ public class AsistenciaFragment extends Fragment {
 
         fechaHoy = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
 
-        // Revisar si ya hay registro de entrada hoy
+        // Inicializar CardView y TextViews
+        cardView = view.findViewById(R.id.cardView);
+        tvUserEmail = view.findViewById(R.id.tvUserEmail);
+        tvFecha = view.findViewById(R.id.tvFecha);
+        tvHora = view.findViewById(R.id.tvHora);
+        tvEstado = view.findViewById(R.id.tvEstado);
+
+        tvUserEmail.setText("Correo: " + (auth.getCurrentUser() != null ? auth.getCurrentUser().getEmail() : "---"));
+        tvFecha.setText("Fecha: " + fechaHoy);
+        cardView.setVisibility(View.GONE); // oculto hasta cargar datos
+
+        // Inicializar botones
+        btnRegistrarEntrada = view.findViewById(R.id.btnRegistrarAsistencia);
+        btnRegistrarSalida = view.findViewById(R.id.btnRegistrarSalida);
+
+        // Revisar asistencia del día
         verificarAsistenciaHoy();
 
+        // Listeners
         btnRegistrarEntrada.setOnClickListener(v -> checkLocationAndRegisterEntrada());
         btnRegistrarSalida.setOnClickListener(v -> registrarSalida());
 
@@ -75,7 +94,9 @@ public class AsistenciaFragment extends Fragment {
                 btnRegistrarEntrada.setVisibility(View.GONE);
                 btnRegistrarSalida.setVisibility(View.VISIBLE);
 
-                // Si ya se registró salida, ocultamos todo
+                // Cargar datos al CardView
+                actualizarCard(document);
+
                 if (document.contains("horaSalida")) {
                     btnRegistrarSalida.setVisibility(View.GONE);
                 }
@@ -131,6 +152,9 @@ public class AsistenciaFragment extends Fragment {
                     btnRegistrarEntrada.setVisibility(View.GONE);
                     btnRegistrarSalida.setVisibility(View.VISIBLE);
                     Toast.makeText(requireContext(), "✅ Entrada registrada (" + estado + ")", Toast.LENGTH_SHORT).show();
+
+                    // Actualizar CardView
+                    actualizarCard(data);
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(requireContext(), "Error al registrar: " + e.getMessage(), Toast.LENGTH_SHORT).show());
@@ -159,6 +183,10 @@ public class AsistenciaFragment extends Fragment {
                         .addOnSuccessListener(unused -> {
                             btnRegistrarSalida.setVisibility(View.GONE);
                             Toast.makeText(requireContext(), "🕕 Salida registrada", Toast.LENGTH_SHORT).show();
+
+                            // Actualizar CardView con hora de salida
+                            ref.get().addOnSuccessListener(document -> actualizarCard(document));
+
                             actualizarResumenSemanal(uid, fechaHoy);
                         })
                         .addOnFailureListener(e ->
@@ -176,7 +204,7 @@ public class AsistenciaFragment extends Fragment {
             Date horaInicio = sdf.parse("09:00");
             Date horaLimite = sdf.parse("09:15");
 
-            if (horaEntrada != null && horaEntrada.after(horaInicio) && horaEntrada.after(horaLimite)) {
+            if (horaEntrada != null && horaEntrada.after(horaLimite)) {
                 return "retardo";
             } else {
                 return "puntual";
@@ -197,7 +225,6 @@ public class AsistenciaFragment extends Fragment {
                 .collection("resumenSemanal")
                 .document(idSemana);
 
-        // Leer estado del día actual
         db.collection("asistencias").document(uid)
                 .collection("asistencias").document(fecha)
                 .get()
@@ -221,5 +248,28 @@ public class AsistenciaFragment extends Fragment {
                         return null;
                     });
                 });
+    }
+
+    // Método para actualizar CardView desde Firestore o Map
+    private void actualizarCard(Object data) {
+        String hora = "---";
+        String estado = "No has registrado asistencia";
+
+        if (data instanceof DocumentSnapshot) {
+            DocumentSnapshot doc = (DocumentSnapshot) data;
+            hora = doc.contains("horaEntrada") ? doc.getString("horaEntrada") : "---";
+            if (doc.contains("horaSalida")) {
+                hora += " - " + doc.getString("horaSalida");
+            }
+            estado = doc.contains("estado") ? doc.getString("estado") : estado;
+        } else if (data instanceof Map) {
+            Map<?, ?> map = (Map<?, ?>) data;
+            hora = map.containsKey("horaEntrada") ? map.get("horaEntrada").toString() : "---";
+            estado = map.containsKey("estado") ? map.get("estado").toString() : estado;
+        }
+
+        tvHora.setText("Hora: " + hora);
+        tvEstado.setText("Estado: " + estado);
+        cardView.setVisibility(View.VISIBLE);
     }
 }

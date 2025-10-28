@@ -1,0 +1,44 @@
+<resources>
+    <string name="app_name">AltecomDev</string>
+    <string name="desarrollador">Desarrollado por AltecomDevTeam</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+
+    <string name="inicio">Inicio</string>
+    <string name="listar_admin">Tareas por hacer</string>
+    <string name="perfil_admin">Inventario</string>
+    <string name="registrar_admin">Progreso de tareas</string>
+    <string name="salir">Cerrar Sesion</string>
+
+    <string name="Opcionestxt">Opciones</string>
+    <string name="InicioCliente">Inicio</string>
+
+    <string name="MasOpcionestxt">Mas opciones</string>
+    <string name="AcercaDe">Acerca de</string>
+    <string name="Compartir">Compartir</string>
+
+    <string name="Acceder">Acceder</string>
+    <string name="LoginTXT">Inicia sesion</string>
+    <string name="Ingresar">Ingresar</string>
+
+    <string name="EligecategoriaTXT">Elige categoria</string>
+    <string name="Peliculas">Peliculas</string>
+    <string name="Musica">Musica</string>
+    <string name="Games">Games</string>
+    <string name="Series">Series</string>
+
+
+    <string name="RegistroTXT">Registro de administrador</string>
+    <string name="Correo">Correo electronico</string>
+    <string name="Password">Contraseña</string>
+    <string name="Nombres">Nombres completos</string>
+    <string name="Apellidos">Apellidos completos</string>
+    <string name="Edad">Edad</string>
+    <string name="FechaRegistro">Fecha de registro</string>
+    <string name="Registrar">Registrar</string>
+
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>

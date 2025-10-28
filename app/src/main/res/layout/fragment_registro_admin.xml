@@ -1,0 +1,89 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:gravity="center_horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Barra de pasos -->
+    <com.anton46.stepsview.StepsView
+        android:id="@+id/stepsView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp" />
+
+    <!-- Contenedor de íconos arriba de cada paso -->
+    <LinearLayout
+        android:id="@+id/iconsContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:weightSum="5"
+        android:layout_marginTop="-40dp"
+        android:paddingHorizontal="16dp">
+
+        <ImageView
+            android:id="@+id/iconStart"
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:layout_weight="1"
+            android:src="@drawable/step1"
+            android:translationX="-12dp"/>
+
+        <ImageView
+            android:id="@+id/iconTaken"
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:layout_weight="1"
+            android:src="@drawable/step2"
+            android:translationX="-7dp"/>
+
+        <ImageView
+            android:id="@+id/iconOnWay"
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:layout_weight="1"
+            android:src="@drawable/step3" />
+
+        <ImageView
+            android:id="@+id/iconWorking"
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:layout_weight="1"
+            android:src="@drawable/step4"
+            android:translationX="7dp"/>
+
+        <ImageView
+            android:id="@+id/iconDone"
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:layout_weight="1"
+            android:src="@drawable/step5"
+            android:translationX="10dp"/>
+    </LinearLayout>
+
+    <!-- Botón de avance (mantener presionado) -->
+    <Button
+        android:id="@+id/btnNextStep"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Confirmar paso"
+        android:layout_marginTop="40dp"
+        android:padding="12dp"
+        android:background="@drawable/botonpaso"
+        app:backgroundTint="#A7C7E7"
+        android:textColor="@color/black"/>
+
+    <Button
+        android:id="@+id/btnSubirEvidencia"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Subir Evidencia"
+        android:visibility="gone"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/botonevidencia"
+        app:backgroundTint="#FFAAA5"
+        android:textColor="@color/black"/>
+
+</LinearLayout>

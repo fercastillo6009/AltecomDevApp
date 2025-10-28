@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnAgregar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Agregar al Inventario"
+        android:textAllCaps="false"
+        android:layout_marginBottom="12dp"
+        android:padding="16dp"
+        android:background="@drawable/botonadd"
+        app:icon="@drawable/icadd"
+        app:iconSize="24dp"
+        app:iconGravity="textStart"
+        app:iconPadding="12dp"
+        app:iconTint="@null"
+        app:backgroundTint="#A8E6CF"
+        android:textColor="@android:color/black" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnQuitar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Quitar del Inventario"
+        android:textAllCaps="false"
+        android:padding="16dp"
+        android:background="@drawable/botonremove"
+        app:icon="@drawable/icremove"
+        app:iconSize="24dp"
+        app:iconGravity="textStart"
+        app:iconPadding="12dp"
+        app:iconTint="@null"
+        app:backgroundTint="#FFAAA5"
+        android:textColor="@android:color/black" />
+
+</LinearLayout>

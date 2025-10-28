@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "575147868713",
+    "project_id": "altecomdevapp",
+    "storage_bucket": "altecomdevapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:575147868713:android:6507af5dc08d0ff6dc5238",
+        "android_client_info": {
+          "package_name": "com.example.fondodepantalla"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_sUQn-6Gp06YchOo9sDiPKGf6FNOG_pE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

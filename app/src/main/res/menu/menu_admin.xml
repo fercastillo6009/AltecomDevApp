@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group
+        android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/InicioAdmin"
+            android:title="@string/inicio"/>
+        <item
+            android:id="@+id/PerfilAdmin"
+            android:title="@string/perfil_admin"/>
+        <item
+            android:id="@+id/RegistrarAdmin"
+            android:title="Asistencia"/>
+        <item
+            android:id="@+id/ListarAdmin"
+            android:title="@string/listar_admin"/>
+        <item
+            android:id="@+id/SalirAdmin"
+            android:title="@string/salir"/>
+
+    </group>
+
+</menu>

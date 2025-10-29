@@ -164,10 +164,17 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
     @Override
     protected void onStart() {
         super.onStart();
+
         // Solo redirigir si no hay usuario
         if (user == null) {
             startActivity(new Intent(MainActivityAdministrador.this, InicioSesion.class));
             finish();
+        } else {
+            // Guardar hora de apertura si el usuario está logueado
+            SharedPreferences prefs = getSharedPreferences("AsistenciaPrefs", MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putLong("ultima_apertura", System.currentTimeMillis());
+            editor.apply();
         }
     }
 }

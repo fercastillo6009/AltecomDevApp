@@ -63,7 +63,7 @@
             android:translationX="10dp"/>
     </LinearLayout>
 
-    <!-- Botón de avance (mantener presionado) -->
+    <!-- Botón de avance -->
     <Button
         android:id="@+id/btnNextStep"
         android:layout_width="wrap_content"
@@ -75,6 +75,7 @@
         app:backgroundTint="#A7C7E7"
         android:textColor="@color/black"/>
 
+    <!-- Botón para subir evidencia -->
     <Button
         android:id="@+id/btnSubirEvidencia"
         android:layout_width="wrap_content"
@@ -85,5 +86,67 @@
         android:background="@drawable/botonevidencia"
         app:backgroundTint="#FFAAA5"
         android:textColor="@color/black"/>
+
+    <!-- Formulario de confirmación (oculto por defecto) -->
+    <LinearLayout
+        android:id="@+id/layoutConfirmacion"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:visibility="gone"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/fondo_formulario">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="¿Se realizó el trabajo solicitado con éxito?"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp"/>
+
+        <CheckBox
+            android:id="@+id/checkExito"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sí, se completó"
+            android:layout_marginBottom="12dp"/>
+
+        <EditText
+            android:id="@+id/etComentario"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Comentario (opcional)"
+            android:inputType="textMultiLine"
+            android:minLines="3"
+            android:layout_marginBottom="12dp"/>
+
+        <com.github.gcacace.signaturepad.views.SignaturePad
+            android:id="@+id/signaturePad"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:background="@android:color/darker_gray"
+            android:layout_marginBottom="12dp"/>
+
+        <Button
+            android:id="@+id/btnEnviarConfirmacion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enviar"
+            android:background="@drawable/botonpaso"
+            android:textColor="@color/black"/>
+
+        <ProgressBar
+            android:id="@+id/progressBarConfirmacion"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            android:padding="16dp"/>
+
+    </LinearLayout>
 
 </LinearLayout>

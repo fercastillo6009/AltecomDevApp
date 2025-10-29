@@ -3,6 +3,7 @@ package com.example.fondodepantalla;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -12,6 +13,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.example.fondodepantalla.FragmentosAdministrador.InicioAdmin;
@@ -22,6 +24,8 @@ import com.example.fondodepantalla.FragmentosAdministrador.AsistenciaFragment;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
+import java.util.Calendar;
 
 public class MainActivityAdministrador extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -49,12 +53,16 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar,
                 R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
         firebaseAuth = FirebaseAuth.getInstance();
         user = firebaseAuth.getCurrentUser();
+
+        // 🔹 CAMBIO DE LOGO DINÁMICO EN HEADER
+        View headerView = navigationView.getHeaderView(0); // obtiene el primer header
+        AppCompatImageView logo = headerView.findViewById(R.id.logo_encabezado);
+        logo.setImageResource(getLogoPorMes());
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_containerA,
@@ -66,35 +74,45 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
         ComprobandoInicioSesion();
     }
 
+    // 🔹 Método para obtener logo según el mes
+    private int getLogoPorMes() {
+        int mes = Calendar.getInstance().get(Calendar.MONTH) + 1; // Enero = 1
+
+        switch (mes) {
+            case 2:  return R.drawable.logofeb;
+            case 9:  return R.drawable.logosep;
+            case 10: return R.drawable.logooct;
+            case 11: return R.drawable.logonov;
+            case 12: return R.drawable.logodec;
+            default: return R.drawable.logodev;
+        }
+    }
+
     @SuppressLint("MissingSuperCall")
     @Override
     public void onBackPressed() {
         Toast.makeText(this, "Botón de retroceso deshabilitado", Toast.LENGTH_SHORT).show();
     }
 
-
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.InicioAdmin){
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_containerA,
                     new InicioAdmin()).commit();
-        }
-        if(item.getItemId() == R.id.PerfilAdmin){
+        } else if(item.getItemId() == R.id.PerfilAdmin){
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_containerA,
                     new PerfilAdmin()).commit();
-        }
-        if (item.getItemId() == R.id.RegistrarAdmin) {
+        } else if (item.getItemId() == R.id.RegistrarAdmin) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_containerA, new AsistenciaFragment())
                     .commit();
-        }
-        if(item.getItemId() == R.id.ListarAdmin){
+        } else if(item.getItemId() == R.id.ListarAdmin){
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_containerA,
                     new ListaAdmin()).commit();
-        }
-        if(item.getItemId() == R.id.SalirAdmin){
+        } else if(item.getItemId() == R.id.SalirAdmin){
             CerrarSesion();
         }
+
         drawerLayout.closeDrawer(GravityCompat.START);
         return super.onOptionsItemSelected(item);
     }

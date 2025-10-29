@@ -9,6 +9,7 @@
     android:orientation="vertical">
 
     <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/logo_encabezado"
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:src="@drawable/logodev"/>

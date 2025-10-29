@@ -245,8 +245,6 @@ public class RegistrarAdmin extends Fragment {
                                         "fechaConfirmacion", FieldValue.serverTimestamp()
                                 )
                                 .addOnSuccessListener(aVoid -> {
-                                    Toast.makeText(getContext(), "Confirmación enviada", Toast.LENGTH_SHORT).show();
-
                                     // Limpiar formulario
                                     checkExito.setChecked(false);
                                     etComentario.setText("");
@@ -257,6 +255,16 @@ public class RegistrarAdmin extends Fragment {
                                     layoutConfirmacion.setVisibility(View.GONE);
                                     progressBarConfirmacion.setVisibility(View.GONE);
                                     btnEnviarConfirmacion.setEnabled(true);
+
+                                    // Mostrar toast de tarea completada
+                                    Toast.makeText(getContext(), "¡Felicidades! Has completado la tarea", Toast.LENGTH_SHORT).show();
+
+                                    // Regresar al fragmento ListaAdmin
+                                    ((androidx.appcompat.app.AppCompatActivity) requireActivity())
+                                            .getSupportFragmentManager()
+                                            .beginTransaction()
+                                            .replace(R.id.fragment_containerA, new ListaAdmin())
+                                            .commit();
                                 })
                                 .addOnFailureListener(e -> {
                                     Toast.makeText(getContext(), "Error al guardar confirmación", Toast.LENGTH_SHORT).show();

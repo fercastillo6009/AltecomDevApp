@@ -143,7 +143,7 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
             }
 
         } else {
-            startActivity(new Intent(MainActivityAdministrador.this, MainActivity.class));
+            startActivity(new Intent(MainActivityAdministrador.this, InicioSesion.class));
             finish();
         }
     }
@@ -166,7 +166,7 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
         super.onStart();
         // Solo redirigir si no hay usuario
         if (user == null) {
-            startActivity(new Intent(MainActivityAdministrador.this, MainActivity.class));
+            startActivity(new Intent(MainActivityAdministrador.this, InicioSesion.class));
             finish();
         }
     }

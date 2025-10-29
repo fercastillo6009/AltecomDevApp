@@ -65,8 +65,13 @@ public class ListaAdmin extends Fragment {
                     if (value != null) {
                         for (DocumentSnapshot doc : value.getDocuments()) {
                             Task t = doc.toObject(Task.class);
-                            if (t != null) t.setId(doc.getId());
-                            taskList.add(t);
+                            if (t != null) {
+                                t.setId(doc.getId());
+                                Boolean completada = doc.getBoolean("confirmacionExito");
+                                if (completada == null || !completada) {  // solo agregamos tareas no completadas
+                                    taskList.add(t);
+                                }
+                            }
                         }
                         adapter.notifyDataSetChanged();
                     }

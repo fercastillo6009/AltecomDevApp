@@ -9,11 +9,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
-
 import androidx.core.app.NotificationCompat;
-
 import com.example.fondodepantalla.FragmentosAdministrador.AsistenciaFragment;
-import com.example.fondodepantalla.MainActivity;
 import com.example.fondodepantalla.MainActivityAdministrador;
 import com.example.fondodepantalla.R;
 

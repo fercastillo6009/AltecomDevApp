@@ -10,20 +10,16 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.cardview.widget.CardView;
-
 import com.example.fondodepantalla.R;
+import com.example.fondodepantalla.utils.NotificationHelper;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
@@ -33,31 +29,47 @@ public class AsistenciaFragment extends Fragment {
 
     private LocationHelper locationHelper;
     private Button btnRegistrarEntrada, btnRegistrarSalida;
-    private FirebaseFirestore db;
-    private FirebaseAuth auth;
+    private CardView cardView;
+    private TextView tvUserEmail, tvFecha, tvHora, tvEstado;
 
+    private FirebaseAuth auth;
     private String uid, nombre, fechaHoy;
     private boolean entradaRegistrada = false;
 
-    // CardView y TextViews
-    private CardView cardView;
-    private TextView tvUserEmail, tvFecha, tvHora, tvEstado;
+    private AsistenciaManager asistenciaManager;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_asistencia, container, false);
 
-        // Inicializar LocationHelper y Firebase
-        locationHelper = new LocationHelper(requireContext());
-        db = FirebaseFirestore.getInstance();
+        initFirebase();
+        initViews(view);
+        setupListeners();
+
+        // Manager para la lógica
+        asistenciaManager = new AsistenciaManager(FirebaseFirestore.getInstance(), uid);
+
+        verificarAsistenciaHoy();
+
+        // Programar recordatorio de asistencia (notificación push)
+        NotificationHelper.programarRecordatorio(requireContext());
+
+
+        return view;
+    }
+
+
+    private void initFirebase() {
         auth = FirebaseAuth.getInstance();
         uid = auth.getCurrentUser().getUid();
         nombre = auth.getCurrentUser().getDisplayName() != null ?
                 auth.getCurrentUser().getDisplayName() : "Empleado";
-
         fechaHoy = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+    }
 
-        // Inicializar CardView y TextViews
+    private void initViews(View view) {
+        locationHelper = new LocationHelper(requireContext());
+
         cardView = view.findViewById(R.id.cardView);
         tvUserEmail = view.findViewById(R.id.tvUserEmail);
         tvFecha = view.findViewById(R.id.tvFecha);
@@ -66,35 +78,23 @@ public class AsistenciaFragment extends Fragment {
 
         tvUserEmail.setText("Correo: " + (auth.getCurrentUser() != null ? auth.getCurrentUser().getEmail() : "---"));
         tvFecha.setText("Fecha: " + fechaHoy);
-        cardView.setVisibility(View.GONE); // oculto hasta cargar datos
+        cardView.setVisibility(View.GONE);
 
-        // Inicializar botones
         btnRegistrarEntrada = view.findViewById(R.id.btnRegistrarAsistencia);
         btnRegistrarSalida = view.findViewById(R.id.btnRegistrarSalida);
+    }
 
-        // Revisar asistencia del día
-        verificarAsistenciaHoy();
-
-        // Listeners
+    private void setupListeners() {
         btnRegistrarEntrada.setOnClickListener(v -> checkLocationAndRegisterEntrada());
         btnRegistrarSalida.setOnClickListener(v -> registrarSalida());
-
-        return view;
     }
 
     private void verificarAsistenciaHoy() {
-        DocumentReference ref = db.collection("asistencias")
-                .document(uid)
-                .collection("asistencias")
-                .document(fechaHoy);
-
-        ref.get().addOnSuccessListener(document -> {
+        asistenciaManager.verificarAsistenciaHoy(fechaHoy, document -> {
             if (document.exists()) {
                 entradaRegistrada = true;
                 btnRegistrarEntrada.setVisibility(View.GONE);
                 btnRegistrarSalida.setVisibility(View.VISIBLE);
-
-                // Cargar datos al CardView
                 actualizarCard(document);
 
                 if (document.contains("horaSalida")) {
@@ -132,7 +132,7 @@ public class AsistenciaFragment extends Fragment {
         }
 
         String horaActual = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
-        String estado = calcularEstadoEntrada(horaActual); // puntual o retardo
+        String estado = calcularEstadoEntrada(horaActual);
 
         Map<String, Object> data = new HashMap<>();
         data.put("nombre", nombre);
@@ -142,22 +142,16 @@ public class AsistenciaFragment extends Fragment {
         data.put("latitudEntrada", location.getLatitude());
         data.put("longitudEntrada", location.getLongitude());
 
-        db.collection("asistencias")
-                .document(uid)
-                .collection("asistencias")
-                .document(fechaHoy)
-                .set(data)
-                .addOnSuccessListener(aVoid -> {
+        asistenciaManager.registrarEntrada(data,
+                aVoid -> {
                     entradaRegistrada = true;
                     btnRegistrarEntrada.setVisibility(View.GONE);
                     btnRegistrarSalida.setVisibility(View.VISIBLE);
                     Toast.makeText(requireContext(), "✅ Entrada registrada (" + estado + ")", Toast.LENGTH_SHORT).show();
-
-                    // Actualizar CardView
                     actualizarCard(data);
-                })
-                .addOnFailureListener(e ->
-                        Toast.makeText(requireContext(), "Error al registrar: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                },
+                e -> Toast.makeText(requireContext(), "Error al registrar: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+        );
     }
 
     private void registrarSalida() {
@@ -170,27 +164,15 @@ public class AsistenciaFragment extends Fragment {
             if (location == null) {
                 Toast.makeText(requireContext(), "No se pudo obtener la ubicación", Toast.LENGTH_SHORT).show();
             } else if (locationHelper.isInsideCompanyArea(location.getLatitude(), location.getLongitude())) {
-                String horaSalida = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
-
-                DocumentReference ref = db.collection("asistencias")
-                        .document(uid)
-                        .collection("asistencias")
-                        .document(fechaHoy);
-
-                ref.update("horaSalida", horaSalida,
-                                "latitudSalida", location.getLatitude(),
-                                "longitudSalida", location.getLongitude())
-                        .addOnSuccessListener(unused -> {
+                asistenciaManager.registrarSalida(fechaHoy, location.getLatitude(), location.getLongitude(),
+                        unused -> {
                             btnRegistrarSalida.setVisibility(View.GONE);
                             Toast.makeText(requireContext(), "🕕 Salida registrada", Toast.LENGTH_SHORT).show();
-
-                            // Actualizar CardView con hora de salida
-                            ref.get().addOnSuccessListener(document -> actualizarCard(document));
-
-                            actualizarResumenSemanal(uid, fechaHoy);
-                        })
-                        .addOnFailureListener(e ->
-                                Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                            verificarAsistenciaHoy();
+                            asistenciaManager.actualizarResumenSemanal(fechaHoy);
+                        },
+                        e -> Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                );
             } else {
                 Toast.makeText(requireContext(), "❌ Estás fuera del rango permitido", Toast.LENGTH_SHORT).show();
             }
@@ -201,7 +183,6 @@ public class AsistenciaFragment extends Fragment {
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
             Date horaEntrada = sdf.parse(hora);
-            Date horaInicio = sdf.parse("09:00");
             Date horaLimite = sdf.parse("09:15");
 
             if (horaEntrada != null && horaEntrada.after(horaLimite)) {
@@ -214,43 +195,6 @@ public class AsistenciaFragment extends Fragment {
         }
     }
 
-    private void actualizarResumenSemanal(String uid, String fecha) {
-        Calendar cal = Calendar.getInstance();
-        int semana = cal.get(Calendar.WEEK_OF_YEAR);
-        int año = cal.get(Calendar.YEAR);
-        String idSemana = año + "-W" + semana;
-
-        DocumentReference refResumen = db.collection("asistencias")
-                .document(uid)
-                .collection("resumenSemanal")
-                .document(idSemana);
-
-        db.collection("asistencias").document(uid)
-                .collection("asistencias").document(fecha)
-                .get()
-                .addOnSuccessListener(snapshot -> {
-                    String estado = snapshot.getString("estado");
-                    db.runTransaction(transaction -> {
-                        DocumentSnapshot snap = transaction.get(refResumen);
-                        long asistencias = snap.exists() && snap.contains("asistencias") ? snap.getLong("asistencias") : 0;
-                        long retardos = snap.exists() && snap.contains("retardos") ? snap.getLong("retardos") : 0;
-
-                        Map<String, Object> nuevosDatos = new HashMap<>();
-                        if ("retardo".equals(estado)) {
-                            nuevosDatos.put("retardos", retardos + 1);
-                            nuevosDatos.put("asistencias", asistencias);
-                        } else {
-                            nuevosDatos.put("asistencias", asistencias + 1);
-                            nuevosDatos.put("retardos", retardos);
-                        }
-
-                        transaction.set(refResumen, nuevosDatos);
-                        return null;
-                    });
-                });
-    }
-
-    // Método para actualizar CardView desde Firestore o Map
     private void actualizarCard(Object data) {
         String hora = "---";
         String estado = "No has registrado asistencia";

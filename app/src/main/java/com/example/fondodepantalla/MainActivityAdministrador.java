@@ -25,6 +25,7 @@ import com.example.fondodepantalla.FragmentosAdministrador.ListaAdmin;
 import com.example.fondodepantalla.FragmentosAdministrador.PerfilAdmin;
 import com.example.fondodepantalla.FragmentosAdministrador.RegistrarAdmin;
 import com.example.fondodepantalla.FragmentosAdministrador.AsistenciaFragment;
+import com.example.fondodepantalla.Utils.AppUpdater;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -87,6 +88,9 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
 
         // Comprobación al iniciar por primera vez
         ComprobandoInicioSesion();
+
+        //Verificar si hay actualización disponible
+        AppUpdater.checkForUpdate(this);
     }
 
     // 🔹 Método para obtener logo según el mes
@@ -111,26 +115,39 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.InicioAdmin){
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_containerA,
-                    new InicioAdmin()).commit();
-        } else if(item.getItemId() == R.id.PerfilAdmin){
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_containerA,
-                    new PerfilAdmin()).commit();
-        } else if (item.getItemId() == R.id.RegistrarAdmin) {
+
+        int id = item.getItemId();
+
+        if (id == R.id.InicioAdmin) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_containerA, new InicioAdmin())
+                    .commit();
+        } else if (id == R.id.PerfilAdmin) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_containerA, new PerfilAdmin())
+                    .commit();
+        } else if (id == R.id.RegistrarAdmin) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_containerA, new AsistenciaFragment())
                     .commit();
-        } else if(item.getItemId() == R.id.ListarAdmin){
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_containerA,
-                    new ListaAdmin()).commit();
-        } else if(item.getItemId() == R.id.SalirAdmin){
+        } else if (id == R.id.ListarAdmin) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_containerA, new ListaAdmin())
+                    .commit();
+        } else if (id == R.id.SalirAdmin) {
             CerrarSesion();
         }
 
+        //Esto marca visualmente el ítem seleccionado
+        item.setChecked(true);
+
+        //Cierra el menú lateral
         drawerLayout.closeDrawer(GravityCompat.START);
-        return super.onOptionsItemSelected(item);
+
+        //Devuelve true (indica que el evento fue manejado)
+        return true;
     }
+
 
     private void ComprobandoInicioSesion() {
         if (user != null) {

@@ -15,7 +15,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.cardview.widget.CardView;
 import com.example.fondodepantalla.R;
-import com.example.fondodepantalla.utils.NotificationHelper;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -50,9 +49,6 @@ public class AsistenciaFragment extends Fragment {
         asistenciaManager = new AsistenciaManager(FirebaseFirestore.getInstance(), uid);
 
         verificarAsistenciaHoy();
-
-        // Programar recordatorio de asistencia (notificación push)
-        NotificationHelper.programarRecordatorio(requireContext());
 
 
         return view;

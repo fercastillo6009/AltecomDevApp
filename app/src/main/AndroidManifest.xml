@@ -43,7 +43,6 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".utils.NotificationHelper" />
         <receiver android:name=".RecordatorioReceiver" android:exported="false"/>
 
     </application>

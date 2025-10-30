@@ -45,7 +45,7 @@ public class RecordatorioReceiver extends BroadcastReceiver {
         }
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, channelId)
-                .setSmallIcon(R.drawable.ic_launcher_background) // Cambia por tu icono
+                .setSmallIcon(R.drawable.ic_foreground) // Cambia por tu icono
                 .setContentTitle("Recordatorio de asistencia")
                 .setContentText("No registraste tu asistencia hoy. No olvides hacerlo.")
                 .setPriority(NotificationCompat.PRIORITY_HIGH)

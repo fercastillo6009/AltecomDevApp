@@ -44,7 +44,7 @@
             android:textStyle="bold"
             android:textSize="18sp"
             android:padding="16dp"
-            android:textColor="?attr/colorOnSurface"/>
+            android:textColor="#000000"/>
 
         <!-- Animación -->
         <com.airbnb.lottie.LottieAnimationView
@@ -66,6 +66,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/Correo"
+                android:textColor="#000000"
+                android:textColorHint="#757575"
                 android:inputType="textEmailAddress"/>
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -80,6 +82,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/Password"
+                android:textColor="#000000"
+                android:textColorHint="#757575"
                 android:inputType="textPassword"/>
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -89,6 +93,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/Acceder"
+            android:textColor="#FFFFFF"
+            app:backgroundTint="#1565C0"
             style="?attr/materialButtonStyle"
             android:layout_marginTop="16dp"/>
 

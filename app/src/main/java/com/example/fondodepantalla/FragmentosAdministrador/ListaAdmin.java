@@ -12,6 +12,7 @@ import android.widget.Toast;
 import com.example.fondodepantalla.R;
 import com.example.fondodepantalla.Task;
 import com.example.fondodepantalla.TaskAdapter;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -24,8 +25,9 @@ public class ListaAdmin extends Fragment {
     private TaskAdapter adapter;
     private List<Task> taskList = new ArrayList<>();
     private FirebaseFirestore db;
+    private FirebaseAuth auth;
 
-    public ListaAdmin() { }
+    public ListaAdmin() {}
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -36,9 +38,9 @@ public class ListaAdmin extends Fragment {
         recyclerTasks.setLayoutManager(new LinearLayoutManager(getContext()));
 
         db = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
 
         adapter = new TaskAdapter(taskList, db, task -> {
-            // DEBUG: verifica que el click se dispare
             Toast.makeText(requireContext(), "Click: " + task.getId(), Toast.LENGTH_SHORT).show();
 
             Bundle args = new Bundle();
@@ -47,7 +49,6 @@ public class ListaAdmin extends Fragment {
             RegistrarAdmin registrarAdmin = new RegistrarAdmin();
             registrarAdmin.setArguments(args);
 
-            // Usa el FragmentManager del Activity (más seguro)
             ((androidx.appcompat.app.AppCompatActivity) requireActivity())
                     .getSupportFragmentManager()
                     .beginTransaction()
@@ -58,24 +59,31 @@ public class ListaAdmin extends Fragment {
 
         recyclerTasks.setAdapter(adapter);
 
-        db.collection("tareas")
-                .addSnapshotListener((value, error) -> {
-                    if (error != null) return;
-                    taskList.clear();
-                    if (value != null) {
-                        for (DocumentSnapshot doc : value.getDocuments()) {
-                            Task t = doc.toObject(Task.class);
-                            if (t != null) {
-                                t.setId(doc.getId());
-                                Boolean completada = doc.getBoolean("confirmacionExito");
-                                if (completada == null || !completada) {  // solo agregamos tareas no completadas
-                                    taskList.add(t);
+        String uidActual = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : null;
+
+        if (uidActual != null) {
+            db.collection("tareas")
+                    .whereEqualTo("uidAsignado", uidActual) // <-- Filtra por el UID
+                    .addSnapshotListener((value, error) -> {
+                        if (error != null) return;
+                        taskList.clear();
+                        if (value != null) {
+                            for (DocumentSnapshot doc : value.getDocuments()) {
+                                Task t = doc.toObject(Task.class);
+                                if (t != null) {
+                                    t.setId(doc.getId());
+                                    Boolean completada = doc.getBoolean("confirmacionExito");
+                                    if (completada == null || !completada) {
+                                        taskList.add(t);
+                                    }
                                 }
                             }
+                            adapter.notifyDataSetChanged();
                         }
-                        adapter.notifyDataSetChanged();
-                    }
-                });
+                    });
+        } else {
+            Toast.makeText(requireContext(), "Error: no se encontró UID del usuario", Toast.LENGTH_SHORT).show();
+        }
 
         return view;
     }

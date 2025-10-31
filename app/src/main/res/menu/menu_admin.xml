@@ -15,6 +15,10 @@
             android:title="Asignar Tarea"
             android:visible="false"/>
         <item
+            android:id="@+id/ResumenAsistencias"
+            android:title="Resumen de Asistencias"
+            android:visible="false"/>
+        <item
             android:id="@+id/PerfilAdmin"
             android:title="@string/perfil_admin"/>
         <item

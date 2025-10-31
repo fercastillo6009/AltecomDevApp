@@ -25,8 +25,11 @@ import com.example.fondodepantalla.FragmentosAdministrador.InicioAdmin;
 import com.example.fondodepantalla.FragmentosAdministrador.ListaAdmin;
 import com.example.fondodepantalla.FragmentosAdministrador.PerfilAdmin;
 import com.example.fondodepantalla.FragmentosAdministrador.AsistenciaFragment;
+import com.example.fondodepantalla.FragmentosAdministrador.ResumenFragment;
 import com.example.fondodepantalla.Utils.AppUpdater;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.appcheck.FirebaseAppCheck;
+import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -50,6 +53,12 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
         // Inicializar FirebaseAuth y usuario antes de cualquier uso
         firebaseAuth = FirebaseAuth.getInstance();
         user = firebaseAuth.getCurrentUser();
+
+        //app check para pruebas
+        FirebaseAppCheck firebaseAppCheck = FirebaseAppCheck.getInstance();
+        firebaseAppCheck.installAppCheckProviderFactory(
+                DebugAppCheckProviderFactory.getInstance()
+        );
 
         // Si el usuario es nulo, redirigir al login y salir
         if (user == null) {
@@ -88,9 +97,11 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
 
                         if ("admin".equals(rol)) {
                             menu.findItem(R.id.AsignarTarea).setVisible(true);
+                            menu.findItem(R.id.ResumenAsistencias).setVisible(true); // <-- nuevo
                             menu.findItem(R.id.ListarAdmin).setVisible(false);
                         } else {
                             menu.findItem(R.id.AsignarTarea).setVisible(false);
+                            menu.findItem(R.id.ResumenAsistencias).setVisible(false); // <-- oculto para no-admin
                             menu.findItem(R.id.ListarAdmin).setVisible(true);
                         }
                     }
@@ -159,6 +170,10 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
         } else if (id == R.id.AsignarTarea) {
             Intent intent = new Intent(this, AsignarTareaActivity.class);
             startActivity(intent);
+        } else if (id == R.id.ResumenAsistencias) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_containerA, new ResumenFragment())
+                    .commit();
         } else if (id == R.id.SalirAdmin) {
             CerrarSesion();
         }

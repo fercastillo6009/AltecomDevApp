@@ -16,6 +16,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
@@ -23,12 +24,12 @@ import android.widget.Toast;
 import com.example.fondodepantalla.FragmentosAdministrador.InicioAdmin;
 import com.example.fondodepantalla.FragmentosAdministrador.ListaAdmin;
 import com.example.fondodepantalla.FragmentosAdministrador.PerfilAdmin;
-import com.example.fondodepantalla.FragmentosAdministrador.RegistrarAdmin;
 import com.example.fondodepantalla.FragmentosAdministrador.AsistenciaFragment;
 import com.example.fondodepantalla.Utils.AppUpdater;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Calendar;
 
@@ -38,7 +39,6 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
     FirebaseAuth firebaseAuth;
     FirebaseUser user;
 
-    // SharedPreferences para controlar el Toast
     private static final String PREFS_NAME = "SesionPrefs";
     private static final String KEY_TOAST_MOSTRADO = "toastMostrado";
 
@@ -47,6 +47,18 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_administrador);
 
+        // Inicializar FirebaseAuth y usuario antes de cualquier uso
+        firebaseAuth = FirebaseAuth.getInstance();
+        user = firebaseAuth.getCurrentUser();
+
+        // Si el usuario es nulo, redirigir al login y salir
+        if (user == null) {
+            startActivity(new Intent(MainActivityAdministrador.this, InicioSesion.class));
+            finish();
+            return;
+        }
+
+        // Permisos de notificación (Android 13+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -62,41 +74,56 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
         setSupportActionBar(toolbar);
 
         drawerLayout = findViewById(R.id.drawer_layout_A);
-
         NavigationView navigationView = findViewById(R.id.nav_viewA);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setItemIconTintList(null);
+
+        // 🔹 Verificar rol del usuario y ajustar el menú
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("usuarios").document(user.getUid()).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String rol = documentSnapshot.getString("rol");
+                        Menu menu = navigationView.getMenu();
+
+                        if ("admin".equals(rol)) {
+                            menu.findItem(R.id.AsignarTarea).setVisible(true);
+                            menu.findItem(R.id.ListarAdmin).setVisible(false);
+                        } else {
+                            menu.findItem(R.id.AsignarTarea).setVisible(false);
+                            menu.findItem(R.id.ListarAdmin).setVisible(true);
+                        }
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Error al verificar el rol", Toast.LENGTH_SHORT).show()
+                );
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar,
                 R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        firebaseAuth = FirebaseAuth.getInstance();
-        user = firebaseAuth.getCurrentUser();
-
-        // 🔹 CAMBIO DE LOGO DINÁMICO EN HEADER
-        View headerView = navigationView.getHeaderView(0); // obtiene el primer header
+        // 🔹 Logo dinámico según mes
+        View headerView = navigationView.getHeaderView(0);
         AppCompatImageView logo = headerView.findViewById(R.id.logo_encabezado);
         logo.setImageResource(getLogoPorMes());
 
+        // Cargar fragmento inicial
         if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_containerA,
-                    new InicioAdmin()).commit();
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_containerA, new InicioAdmin())
+                    .commit();
             navigationView.setCheckedItem(R.id.InicioAdmin);
         }
 
-        // Comprobación al iniciar por primera vez
         ComprobandoInicioSesion();
-
-        //Verificar si hay actualización disponible
         AppUpdater.checkForUpdate(this);
     }
 
-    // 🔹 Método para obtener logo según el mes
+    // 🔹 Logo por mes
     private int getLogoPorMes() {
-        int mes = Calendar.getInstance().get(Calendar.MONTH) + 1; // Enero = 1
-
+        int mes = Calendar.getInstance().get(Calendar.MONTH) + 1;
         switch (mes) {
             case 2:  return R.drawable.logofeb;
             case 9:  return R.drawable.logosep;
@@ -115,50 +142,40 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-
         int id = item.getItemId();
 
         if (id == R.id.InicioAdmin) {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_containerA, new InicioAdmin())
-                    .commit();
+                    .replace(R.id.fragment_containerA, new InicioAdmin()).commit();
         } else if (id == R.id.PerfilAdmin) {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_containerA, new PerfilAdmin())
-                    .commit();
+                    .replace(R.id.fragment_containerA, new PerfilAdmin()).commit();
         } else if (id == R.id.RegistrarAdmin) {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_containerA, new AsistenciaFragment())
-                    .commit();
+                    .replace(R.id.fragment_containerA, new AsistenciaFragment()).commit();
         } else if (id == R.id.ListarAdmin) {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_containerA, new ListaAdmin())
-                    .commit();
+                    .replace(R.id.fragment_containerA, new ListaAdmin()).commit();
+        } else if (id == R.id.AsignarTarea) {
+            Intent intent = new Intent(this, AsignarTareaActivity.class);
+            startActivity(intent);
         } else if (id == R.id.SalirAdmin) {
             CerrarSesion();
         }
 
-        //Esto marca visualmente el ítem seleccionado
         item.setChecked(true);
-
-        //Cierra el menú lateral
         drawerLayout.closeDrawer(GravityCompat.START);
-
-        //Devuelve true (indica que el evento fue manejado)
         return true;
     }
-
 
     private void ComprobandoInicioSesion() {
         if (user != null) {
             SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
             boolean toastMostrado = prefs.getBoolean(KEY_TOAST_MOSTRADO, false);
-
             if (!toastMostrado) {
                 Toast.makeText(this, "Se ha iniciado sesión", Toast.LENGTH_SHORT).show();
                 prefs.edit().putBoolean(KEY_TOAST_MOSTRADO, true).apply();
             }
-
         } else {
             startActivity(new Intent(MainActivityAdministrador.this, InicioSesion.class));
             finish();
@@ -167,13 +184,10 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
 
     private void CerrarSesion() {
         firebaseAuth.signOut();
-
-        // Resetear Toast para la próxima sesión
         getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
                 .edit()
                 .putBoolean(KEY_TOAST_MOSTRADO, false)
                 .apply();
-
         startActivity(new Intent(MainActivityAdministrador.this, InicioSesion.class));
         Toast.makeText(this, "Cerraste sesión exitosamente", Toast.LENGTH_SHORT).show();
     }
@@ -181,17 +195,13 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
     @Override
     protected void onStart() {
         super.onStart();
-
-        // Solo redirigir si no hay usuario
+        user = firebaseAuth.getCurrentUser();
         if (user == null) {
             startActivity(new Intent(MainActivityAdministrador.this, InicioSesion.class));
             finish();
         } else {
-            // Guardar hora de apertura si el usuario está logueado
             SharedPreferences prefs = getSharedPreferences("AsistenciaPrefs", MODE_PRIVATE);
-            SharedPreferences.Editor editor = prefs.edit();
-            editor.putLong("ultima_apertura", System.currentTimeMillis());
-            editor.apply();
+            prefs.edit().putLong("ultima_apertura", System.currentTimeMillis()).apply();
         }
     }
 }

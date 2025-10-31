@@ -42,6 +42,7 @@ public class RegistrarAdmin extends Fragment {
     private CheckBox checkExito;
     private EditText etComentario;
     private SignaturePad signaturePad;
+    private Button btnBorrarFirma;
 
     private static final int PICK_IMAGES_REQUEST = 101;
 
@@ -87,6 +88,13 @@ public class RegistrarAdmin extends Fragment {
         btnEnviarConfirmacion.setOnClickListener(v -> enviarConfirmacion());
 
         progressBarConfirmacion = view.findViewById(R.id.progressBarConfirmacion);
+
+        btnBorrarFirma = view.findViewById(R.id.btnBorrarFirma);
+
+        btnBorrarFirma.setOnClickListener(v -> {
+            signaturePad.clear();
+            Toast.makeText(getContext(), "Firma borrada. Puedes volver a firmar.", Toast.LENGTH_SHORT).show();
+        });
 
         return view;
     }

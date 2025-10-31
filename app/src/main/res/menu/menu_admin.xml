@@ -11,6 +11,10 @@
             android:id="@+id/InicioAdmin"
             android:title="@string/inicio"/>
         <item
+            android:id="@+id/AsignarTarea"
+            android:title="Asignar Tarea"
+            android:visible="false"/>
+        <item
             android:id="@+id/PerfilAdmin"
             android:title="@string/perfil_admin"/>
         <item

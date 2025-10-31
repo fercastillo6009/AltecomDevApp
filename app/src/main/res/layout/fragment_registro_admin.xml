@@ -129,13 +129,32 @@
             android:background="@android:color/darker_gray"
             android:layout_marginBottom="12dp"/>
 
-        <Button
-            android:id="@+id/btnEnviarConfirmacion"
-            android:layout_width="wrap_content"
+        <!-- Contenedor horizontal para botones de firma -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Enviar"
-            android:background="@drawable/botonpaso"
-            android:textColor="@color/black"/>
+            android:orientation="horizontal"
+            android:gravity="center_horizontal"
+            android:layout_marginBottom="12dp"
+            android:weightSum="2">
+
+            <Button
+                android:id="@+id/btnBorrarFirma"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Borrar firma"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btnEnviarConfirmacion"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Enviar"
+                android:background="@drawable/botonpaso"
+                android:textColor="@color/black"/>
+        </LinearLayout>
 
         <ProgressBar
             android:id="@+id/progressBarConfirmacion"
@@ -146,7 +165,7 @@
             android:layout_gravity="center"
             android:indeterminate="true"
             android:padding="16dp"/>
-
     </LinearLayout>
+
 
 </LinearLayout>

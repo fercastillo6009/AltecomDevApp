@@ -26,6 +26,7 @@ import com.example.fondodepantalla.FragmentosAdministrador.ListaAdmin;
 import com.example.fondodepantalla.FragmentosAdministrador.PerfilAdmin;
 import com.example.fondodepantalla.FragmentosAdministrador.AsistenciaFragment;
 import com.example.fondodepantalla.FragmentosAdministrador.ResumenFragment;
+import com.example.fondodepantalla.FragmentosAdministrador.AsignarTareaFragment;
 import com.example.fondodepantalla.Utils.AppUpdater;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.appcheck.FirebaseAppCheck;
@@ -168,8 +169,10 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_containerA, new ListaAdmin()).commit();
         } else if (id == R.id.AsignarTarea) {
-            Intent intent = new Intent(this, AsignarTareaActivity.class);
-            startActivity(intent);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_containerA, new AsignarTareaFragment())
+                    .addToBackStack(null) // opcional, para poder volver atrás
+                    .commit();
         } else if (id == R.id.ResumenAsistencias) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_containerA, new ResumenFragment())

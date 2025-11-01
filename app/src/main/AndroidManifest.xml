@@ -44,7 +44,6 @@
         </activity>
 
         <receiver android:name=".RecordatorioReceiver" android:exported="false"/>
-        <activity android:name=".AsignarTareaFragment" />
 
     </application>
 

@@ -27,6 +27,8 @@
 
     <color name="green">#22FB5F</color>
     <color name="red">#FA3C2E</color>
+    <color name="bgcolor">#000000</color>
+
 
 
 </resources>

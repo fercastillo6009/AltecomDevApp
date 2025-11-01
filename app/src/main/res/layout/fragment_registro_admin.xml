@@ -1,172 +1,175 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
-    android:padding="20dp"
-    android:gravity="center_horizontal"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fillViewport="true">
 
-    <!-- Barra de pasos -->
-    <com.anton46.stepsview.StepsView
-        android:id="@+id/stepsView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp" />
-
-    <!-- Contenedor de íconos arriba de cada paso -->
     <LinearLayout
-        android:id="@+id/iconsContainer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:weightSum="5"
-        android:layout_marginTop="-40dp"
-        android:paddingHorizontal="16dp">
-
-        <ImageView
-            android:id="@+id/iconStart"
-            android:layout_width="0dp"
-            android:layout_height="32dp"
-            android:layout_weight="1"
-            android:src="@drawable/step1"
-            android:translationX="-12dp"/>
-
-        <ImageView
-            android:id="@+id/iconTaken"
-            android:layout_width="0dp"
-            android:layout_height="32dp"
-            android:layout_weight="1"
-            android:src="@drawable/step2"
-            android:translationX="-7dp"/>
-
-        <ImageView
-            android:id="@+id/iconOnWay"
-            android:layout_width="0dp"
-            android:layout_height="32dp"
-            android:layout_weight="1"
-            android:src="@drawable/step3" />
-
-        <ImageView
-            android:id="@+id/iconWorking"
-            android:layout_width="0dp"
-            android:layout_height="32dp"
-            android:layout_weight="1"
-            android:src="@drawable/step4"
-            android:translationX="7dp"/>
-
-        <ImageView
-            android:id="@+id/iconDone"
-            android:layout_width="0dp"
-            android:layout_height="32dp"
-            android:layout_weight="1"
-            android:src="@drawable/step5"
-            android:translationX="10dp"/>
-    </LinearLayout>
-
-    <!-- Botón de avance -->
-    <Button
-        android:id="@+id/btnNextStep"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Confirmar paso"
-        android:layout_marginTop="40dp"
-        android:padding="12dp"
-        android:background="@drawable/botonpaso"
-        app:backgroundTint="#A7C7E7"
-        android:textColor="@color/black"/>
-
-    <!-- Botón para subir evidencia -->
-    <Button
-        android:id="@+id/btnSubirEvidencia"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Subir Evidencia"
-        android:visibility="gone"
-        android:layout_marginTop="16dp"
-        android:background="@drawable/botonevidencia"
-        app:backgroundTint="#FFAAA5"
-        android:textColor="@color/black"/>
-
-    <!-- Formulario de confirmación (oculto por defecto) -->
-    <LinearLayout
-        android:id="@+id/layoutConfirmacion"
         android:orientation="vertical"
+        android:padding="20dp"
+        android:gravity="center_horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:visibility="gone"
-        android:layout_marginTop="20dp"
-        android:background="@drawable/fondo_formulario">
+        android:layout_height="wrap_content">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="¿Se realizó el trabajo solicitado con éxito?"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:layout_marginBottom="8dp"/>
-
-        <CheckBox
-            android:id="@+id/checkExito"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Sí, se completó"
-            android:layout_marginBottom="12dp"/>
-
-        <EditText
-            android:id="@+id/etComentario"
+        <!-- Barra de pasos -->
+        <com.anton46.stepsview.StepsView
+            android:id="@+id/stepsView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Comentario (opcional)"
-            android:inputType="textMultiLine"
-            android:minLines="3"
-            android:layout_marginBottom="12dp"/>
+            android:layout_marginTop="24dp" />
 
-        <com.github.gcacace.signaturepad.views.SignaturePad
-            android:id="@+id/signaturePad"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:background="@android:color/darker_gray"
-            android:layout_marginBottom="12dp"/>
-
-        <!-- Contenedor horizontal para botones de firma -->
+        <!-- Contenedor de íconos arriba de cada paso -->
         <LinearLayout
+            android:id="@+id/iconsContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_horizontal"
-            android:layout_marginBottom="12dp"
-            android:weightSum="2">
+            android:gravity="center"
+            android:weightSum="5"
+            android:layout_marginTop="-40dp"
+            android:paddingHorizontal="16dp">
 
-            <Button
-                android:id="@+id/btnBorrarFirma"
+            <ImageView
+                android:id="@+id/iconStart"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="32dp"
                 android:layout_weight="1"
-                android:text="Borrar firma"
-                android:textColor="#FFFFFF"
-                android:layout_marginEnd="8dp"/>
+                android:src="@drawable/step1"
+                android:translationX="-12dp"/>
 
-            <Button
-                android:id="@+id/btnEnviarConfirmacion"
+            <ImageView
+                android:id="@+id/iconTaken"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="32dp"
                 android:layout_weight="1"
-                android:text="Enviar"
-                android:background="@drawable/botonpaso"
-                android:textColor="@color/black"/>
+                android:src="@drawable/step2"
+                android:translationX="-7dp"/>
+
+            <ImageView
+                android:id="@+id/iconOnWay"
+                android:layout_width="0dp"
+                android:layout_height="32dp"
+                android:layout_weight="1"
+                android:src="@drawable/step3" />
+
+            <ImageView
+                android:id="@+id/iconWorking"
+                android:layout_width="0dp"
+                android:layout_height="32dp"
+                android:layout_weight="1"
+                android:src="@drawable/step4"
+                android:translationX="7dp"/>
+
+            <ImageView
+                android:id="@+id/iconDone"
+                android:layout_width="0dp"
+                android:layout_height="32dp"
+                android:layout_weight="1"
+                android:src="@drawable/step5"
+                android:translationX="10dp"/>
         </LinearLayout>
 
-        <ProgressBar
-            android:id="@+id/progressBarConfirmacion"
-            style="?android:attr/progressBarStyleLarge"
+        <!-- Botón de avance -->
+        <Button
+            android:id="@+id/btnNextStep"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="Confirmar paso"
+            android:layout_marginTop="40dp"
+            android:padding="12dp"
+            android:background="@drawable/botonpaso"
+            app:backgroundTint="#A7C7E7"
+            android:textColor="#FFFFFF"/>
+
+        <!-- Botón para subir evidencia -->
+        <Button
+            android:id="@+id/btnSubirEvidencia"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Subir Evidencia"
             android:visibility="gone"
-            android:layout_gravity="center"
-            android:indeterminate="true"
-            android:padding="16dp"/>
+            android:layout_marginTop="16dp"
+            android:background="@drawable/botonevidencia"
+            app:backgroundTint="#FFAAA5"
+            android:textColor="@color/black"/>
+
+        <!-- Formulario de confirmación -->
+        <LinearLayout
+            android:id="@+id/layoutConfirmacion"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:visibility="gone"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/fondo_formulario">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="¿Se realizó el trabajo solicitado con éxito?"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp"/>
+
+            <CheckBox
+                android:id="@+id/checkExito"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sí, se completó"
+                android:layout_marginBottom="12dp"/>
+
+            <EditText
+                android:id="@+id/etComentario"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Comentario (opcional)"
+                android:inputType="textMultiLine"
+                android:minLines="3"
+                android:layout_marginBottom="12dp"/>
+
+            <com.github.gcacace.signaturepad.views.SignaturePad
+                android:id="@+id/signaturePad"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:background="@android:color/darker_gray"
+                android:layout_marginBottom="12dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_horizontal"
+                android:layout_marginBottom="12dp"
+                android:weightSum="2">
+
+                <Button
+                    android:id="@+id/btnBorrarFirma"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Borrar firma"
+                    android:textColor="#FFFFFF"
+                    android:layout_marginEnd="8dp"/>
+
+                <Button
+                    android:id="@+id/btnEnviarConfirmacion"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Enviar"
+                    android:background="@drawable/botonpaso"
+                    android:textColor="#FFFFFF"/>
+            </LinearLayout>
+
+            <ProgressBar
+                android:id="@+id/progressBarConfirmacion"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_gravity="center"
+                android:indeterminate="true"
+                android:padding="16dp"/>
+        </LinearLayout>
     </LinearLayout>
-
-
-</LinearLayout>
+</ScrollView>

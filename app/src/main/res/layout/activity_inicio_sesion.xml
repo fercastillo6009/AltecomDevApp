@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorSurface"
+    android:background="#000000"
     tools:context=".InicioSesion">
 
     <!-- Fondo -->
@@ -13,7 +13,7 @@
         android:id="@+id/bgImage"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:src="@drawable/background_login"
+        android:src="@drawable/background_log"
         android:scaleType="centerCrop"
         android:adjustViewBounds="true"
         app:layout_constraintTop_toTopOf="parent"
@@ -67,6 +67,7 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/Correo"
                 android:textColor="#000000"
+                android:background="@drawable/rounded_edittext"
                 android:textColorHint="#757575"
                 android:inputType="textEmailAddress"/>
         </com.google.android.material.textfield.TextInputLayout>
@@ -83,6 +84,7 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/Password"
                 android:textColor="#000000"
+                android:background="@drawable/rounded_edittext"
                 android:textColorHint="#757575"
                 android:inputType="textPassword"/>
         </com.google.android.material.textfield.TextInputLayout>

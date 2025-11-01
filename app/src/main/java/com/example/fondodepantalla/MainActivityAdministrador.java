@@ -131,9 +131,57 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
 
         ComprobandoInicioSesion();
         AppUpdater.checkForUpdate(this);
+
+        //Iniciar pings automáticos cada 50 segundos
+        iniciarPingPeriodico();
     }
 
-    // 🔹 Logo por mes
+    // ======= Ping Automático =======
+    private final android.os.Handler handlerPing = new android.os.Handler();
+    private final Runnable pingRunnable = new Runnable() {
+        @Override
+        public void run() {
+            new Thread(() -> {
+                try {
+                    java.net.URL url = new java.net.URL("https://altecomasistencia.onrender.com/");
+                    java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("GET");
+                    conn.setConnectTimeout(5000);
+                    conn.setReadTimeout(5000);
+                    conn.connect();
+
+                    int responseCode = conn.getResponseCode();
+                    conn.disconnect();
+
+                    runOnUiThread(() -> {
+                        if (responseCode == 200) {
+                            // Puedes quitar este log si no quieres mostrar nada
+                            System.out.println("✅ Ping exitoso");
+                        } else {
+                            System.out.println("⚠️ Ping falló con código: " + responseCode);
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }).start();
+
+            // Repetir cada 50 segundos (50000 ms)
+            handlerPing.postDelayed(this, 50000);
+        }
+    };
+
+    private void iniciarPingPeriodico() {
+        handlerPing.post(pingRunnable);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Detiene los pings cuando se cierra la actividad
+        handlerPing.removeCallbacks(pingRunnable);
+    }
+    //Logo por mes
     private int getLogoPorMes() {
         int mes = Calendar.getInstance().get(Calendar.MONTH) + 1;
         switch (mes) {

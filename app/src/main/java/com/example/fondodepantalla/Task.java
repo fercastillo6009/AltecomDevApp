@@ -4,7 +4,15 @@ import com.google.firebase.firestore.IgnoreExtraProperties;
 
 @IgnoreExtraProperties
 public class Task {
+    private String descripcion;
 
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
     private String id;      // Este es el ID del documento en Firestore
     private String name;    // Nombre de la tarea
     private boolean taken;  // Estado de si fue tomada o no

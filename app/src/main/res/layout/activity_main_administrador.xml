@@ -11,26 +11,34 @@
     tools:context=".MainActivityAdministrador"
     tools:openDrawer="start">
 
+    <!-- Contenido principal con rootLayout -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/rootLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <androidx.appcompat.widget.LinearLayoutCompat
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-       android:orientation="vertical">
-
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbarA"
-            android:background="@color/colorPrimary"
+        <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-        <FrameLayout
-            android:id="@+id/fragment_containerA"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-    </androidx.appcompat.widget.LinearLayoutCompat>
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbarA"
+                android:background="@color/colorPrimary"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
+            <FrameLayout
+                android:id="@+id/fragment_containerA"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Drawer -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_viewA"
         android:layout_width="wrap_content"

@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,14 +24,12 @@ import com.github.gcacace.signaturepad.views.SignaturePad;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.Map;
 
 public class RegistrarAdmin extends Fragment {
     private ProgressBar progressBarConfirmacion;
-
     private StepsView stepsView;
     private FirebaseFirestore db;
     private String taskId;
@@ -45,7 +42,6 @@ public class RegistrarAdmin extends Fragment {
     private Button btnBorrarFirma;
 
     private static final int PICK_IMAGES_REQUEST = 101;
-
     private final String[] labels = {"Inicio", "st1", "st2", "st3", "Completa"};
 
     @Override
@@ -63,6 +59,7 @@ public class RegistrarAdmin extends Fragment {
         checkExito = view.findViewById(R.id.checkExito);
         etComentario = view.findViewById(R.id.etComentario);
         signaturePad = view.findViewById(R.id.signaturePad);
+        signaturePad.setSaveEnabled(false); // ✅ evitar crash
 
         if (getArguments() != null) {
             taskId = getArguments().getString("taskId");
@@ -90,7 +87,6 @@ public class RegistrarAdmin extends Fragment {
         progressBarConfirmacion = view.findViewById(R.id.progressBarConfirmacion);
 
         btnBorrarFirma = view.findViewById(R.id.btnBorrarFirma);
-
         btnBorrarFirma.setOnClickListener(v -> {
             signaturePad.clear();
             Toast.makeText(getContext(), "Firma borrada. Puedes volver a firmar.", Toast.LENGTH_SHORT).show();
@@ -179,12 +175,8 @@ public class RegistrarAdmin extends Fragment {
                 .option("unique_filename", true)
                 .option("resource_type", "image")
                 .callback(new UploadCallback() {
-                    @Override
-                    public void onStart(String requestId) {}
-
-                    @Override
-                    public void onProgress(String requestId, long bytes, long totalBytes) {}
-
+                    @Override public void onStart(String requestId) {}
+                    @Override public void onProgress(String requestId, long bytes, long totalBytes) {}
                     @Override
                     public void onSuccess(String requestId, Map resultData) {
                         String url = (String) resultData.get("secure_url");
@@ -192,25 +184,27 @@ public class RegistrarAdmin extends Fragment {
                                 .update("evidencias", FieldValue.arrayUnion(url));
                         Toast.makeText(getContext(), "Imagen subida correctamente", Toast.LENGTH_SHORT).show();
 
-                        // Mostrar formulario de confirmación
                         View layoutConfirmacion = getView().findViewById(R.id.layoutConfirmacion);
                         layoutConfirmacion.setVisibility(View.VISIBLE);
                     }
-
-                    @Override
-                    public void onError(String requestId, ErrorInfo error) {
+                    @Override public void onError(String requestId, ErrorInfo error) {
                         Toast.makeText(getContext(), "Error al subir imagen: " + error.getDescription(), Toast.LENGTH_SHORT).show();
                     }
-
-                    @Override
-                    public void onReschedule(String requestId, ErrorInfo error) {}
-                })
-                .dispatch();
+                    @Override public void onReschedule(String requestId, ErrorInfo error) {}
+                }).dispatch();
     }
 
     private void enviarConfirmacion() {
         boolean exito = checkExito.isChecked();
         String comentario = etComentario.getText().toString();
+
+        // ✅ Validar que el pad esté visible y tenga tamaño
+        if (signaturePad.getVisibility() != View.VISIBLE ||
+                signaturePad.getWidth() <= 0 || signaturePad.getHeight() <= 0) {
+            Toast.makeText(getContext(), "No hay firma disponible para enviar", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         Bitmap firma = signaturePad.getSignatureBitmap();
 
         if (!exito) {
@@ -218,9 +212,8 @@ public class RegistrarAdmin extends Fragment {
             return;
         }
 
-        // Mostrar ProgressBar
         progressBarConfirmacion.setVisibility(View.VISIBLE);
-        btnEnviarConfirmacion.setEnabled(false); // Evitar múltiples clicks
+        btnEnviarConfirmacion.setEnabled(false);
 
         Uri firmaUri = bitmapToUri(firma);
         if (firmaUri == null) {
@@ -235,12 +228,8 @@ public class RegistrarAdmin extends Fragment {
                 .option("use_filename", true)
                 .option("unique_filename", true)
                 .callback(new UploadCallback() {
-                    @Override
-                    public void onStart(String requestId) {}
-
-                    @Override
-                    public void onProgress(String requestId, long bytes, long totalBytes) {}
-
+                    @Override public void onStart(String requestId) {}
+                    @Override public void onProgress(String requestId, long bytes, long totalBytes) {}
                     @Override
                     public void onSuccess(String requestId, Map resultData) {
                         String firmaUrl = (String) resultData.get("secure_url");
@@ -253,21 +242,17 @@ public class RegistrarAdmin extends Fragment {
                                         "fechaConfirmacion", FieldValue.serverTimestamp()
                                 )
                                 .addOnSuccessListener(aVoid -> {
-                                    // Limpiar formulario
                                     checkExito.setChecked(false);
                                     etComentario.setText("");
                                     signaturePad.clear();
 
-                                    // Ocultar formulario y ProgressBar
                                     View layoutConfirmacion = getView().findViewById(R.id.layoutConfirmacion);
                                     layoutConfirmacion.setVisibility(View.GONE);
                                     progressBarConfirmacion.setVisibility(View.GONE);
                                     btnEnviarConfirmacion.setEnabled(true);
 
-                                    // Mostrar toast de tarea completada
                                     Toast.makeText(getContext(), "¡Felicidades! Has completado la tarea", Toast.LENGTH_SHORT).show();
 
-                                    // Regresar al fragmento ListaAdmin
                                     ((androidx.appcompat.app.AppCompatActivity) requireActivity())
                                             .getSupportFragmentManager()
                                             .beginTransaction()
@@ -280,20 +265,15 @@ public class RegistrarAdmin extends Fragment {
                                     btnEnviarConfirmacion.setEnabled(true);
                                 });
                     }
-
-                    @Override
-                    public void onError(String requestId, ErrorInfo error) {
+                    @Override public void onError(String requestId, ErrorInfo error) {
                         Toast.makeText(getContext(), "Error al subir firma: " + error.getDescription(), Toast.LENGTH_SHORT).show();
                         progressBarConfirmacion.setVisibility(View.GONE);
                         btnEnviarConfirmacion.setEnabled(true);
                     }
-
                     @Override public void onReschedule(String requestId, ErrorInfo error) {}
-                })
-                .dispatch();
+                }).dispatch();
     }
 
-    // Convierte Bitmap a Uri usando archivo temporal (recomendado)
     private Uri bitmapToUri(Bitmap bitmap) {
         try {
             File file = new File(getContext().getCacheDir(), "firma_" + System.currentTimeMillis() + ".png");
@@ -307,5 +287,4 @@ public class RegistrarAdmin extends Fragment {
             return null;
         }
     }
-
 }

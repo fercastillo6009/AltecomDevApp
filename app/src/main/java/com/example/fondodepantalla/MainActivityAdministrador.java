@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import android.animation.Animator;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -19,6 +20,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.widget.Toast;
 
 import com.example.fondodepantalla.FragmentosAdministrador.InicioAdmin;
@@ -50,6 +52,19 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_administrador);
+
+        final View rootView = findViewById(R.id.rootLayout); // rootLayout es tu contenedor principal
+        rootView.setVisibility(View.INVISIBLE);
+
+        rootView.post(() -> {
+            int cx = getIntent().getIntExtra("cx", rootView.getWidth()/2);
+            int cy = getIntent().getIntExtra("cy", rootView.getHeight()/2);
+            float finalRadius = (float) Math.hypot(rootView.getWidth(), rootView.getHeight());
+            Animator anim = ViewAnimationUtils.createCircularReveal(rootView, cx, cy, 0f, finalRadius);
+            rootView.setVisibility(View.VISIBLE);
+            anim.setDuration(1400);
+            anim.start();
+        });
 
         // Inicializar FirebaseAuth y usuario antes de cualquier uso
         firebaseAuth = FirebaseAuth.getInstance();

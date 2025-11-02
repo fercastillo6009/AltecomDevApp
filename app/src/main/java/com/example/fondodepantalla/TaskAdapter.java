@@ -10,7 +10,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -42,6 +41,12 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Task task = tasks.get(position);
+
+        // Mostrar descripción real de la tarea
+        holder.tvTaskDesc.setText(task.getDescripcion() != null && !task.getDescripcion().isEmpty()
+                ? task.getDescripcion()
+                : "Sin descripción");
+
         holder.tvName.setText(task.getName());
         holder.switchTaken.setOnCheckedChangeListener(null);
         holder.switchTaken.setChecked(task.isTaken());
@@ -89,12 +94,13 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
     public int getItemCount() { return tasks.size(); }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvName;
+        TextView tvName, tvTaskDesc; // ✅ agregar TextView de descripción
         Switch switchTaken;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvName = itemView.findViewById(R.id.tvTaskName);
+            tvTaskDesc = itemView.findViewById(R.id.tvTaskDesc); // ✅ vincular con XML
             switchTaken = itemView.findViewById(R.id.switchTaken);
         }
     }

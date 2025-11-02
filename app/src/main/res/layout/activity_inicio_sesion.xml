@@ -3,6 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#000000"
@@ -19,9 +20,9 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Contenido -->
+    <!-- Contenido principal -->
     <LinearLayout
         android:id="@+id/contentLayout"
         android:layout_width="0dp"
@@ -44,7 +45,7 @@
             android:textStyle="bold"
             android:textSize="18sp"
             android:padding="16dp"
-            android:textColor="#000000"/>
+            android:textColor="#FFFFFF" />
 
         <!-- Animación -->
         <com.airbnb.lottie.LottieAnimationView
@@ -53,7 +54,7 @@
             android:layout_marginTop="10dp"
             app:lottie_fileName="iniciosesion.json"
             app:lottie_autoPlay="true"
-            app:lottie_loop="true"/>
+            app:lottie_loop="true" />
 
         <!-- Campo Correo -->
         <com.google.android.material.textfield.TextInputLayout
@@ -63,13 +64,13 @@
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/Correo"
+                android:background="@drawable/rounded_edittext"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/Correo"
                 android:textColor="#000000"
-                android:background="@drawable/rounded_edittext"
-                android:textColorHint="#757575"
-                android:inputType="textEmailAddress"/>
+                android:textColorHint="#B0B0B0"
+                android:inputType="textEmailAddress" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Campo Password -->
@@ -80,13 +81,13 @@
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/Password"
+                android:background="@drawable/rounded_edittext"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/Password"
                 android:textColor="#000000"
-                android:background="@drawable/rounded_edittext"
-                android:textColorHint="#757575"
-                android:inputType="textPassword"/>
+                android:textColorHint="#B0B0B0"
+                android:inputType="textPassword" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Botón Acceder -->
@@ -96,10 +97,35 @@
             android:layout_height="wrap_content"
             android:text="@string/Acceder"
             android:textColor="#FFFFFF"
+            app:cornerRadius="25dp"
             app:backgroundTint="#1565C0"
             style="?attr/materialButtonStyle"
-            android:layout_marginTop="16dp"/>
+            android:layout_marginTop="16dp" />
 
     </LinearLayout>
+
+    <!-- Overlay de carga (reemplaza el ProgressDialog) -->
+    <FrameLayout
+        android:id="@+id/loadingOverlay"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#80000000"
+        android:visibility="gone"
+        android:gravity="center"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/progressIndicator"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            app:indicatorSize="48dp"
+            app:trackThickness="5dp"
+            app:indicatorColor="#0363F4"
+            app:trackColor="#444444" />
+    </FrameLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

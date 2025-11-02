@@ -54,8 +54,11 @@
                 android:textColor="#767676"
                 android:textSize="14sp"
                 android:ellipsize="end"
+                android:singleLine="false"
                 android:maxLines="2"
+                android:scrollHorizontally="false"
                 android:layout_marginTop="2dp"/>
+
         </LinearLayout>
 
         <!-- Switch moderno -->

@@ -1,18 +1,20 @@
 plugins {
     id 'com.android.application'
     id 'com.google.gms.google-services'
+    id 'org.jetbrains.kotlin.android'
+    id 'org.jetbrains.kotlin.plugin.compose' // 👈 requerido desde Kotlin 2.0
 }
 
 android {
     namespace 'com.example.fondodepantalla'
-    compileSdk 34
+    compileSdk 36
 
     defaultConfig {
         applicationId "com.example.fondodepantalla"
         minSdk 23
-        targetSdk 33
+        targetSdk 36
         versionCode 1
-        versionName "1.7.0"
+        versionName "1.7.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -25,43 +27,56 @@ android {
     }
 
     buildFeatures {
-        buildConfig = true
+        compose true
+        buildConfig true
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = '17'
     }
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.7.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
-    implementation 'com.airbnb.android:lottie:3.0.1'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'com.google.android.material:material:1.13.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
+    implementation "androidx.core:core-ktx:1.13.1"
+
+    // Compose BOM
+    implementation platform('androidx.compose:compose-bom:2024.10.00')
+    implementation 'androidx.compose.ui:ui'
+    implementation 'androidx.compose.material3:material3'
+    implementation 'androidx.compose.ui:ui-tooling-preview'
+    debugImplementation 'androidx.compose.ui:ui-tooling'
+    implementation 'androidx.activity:activity-compose:1.9.3'
+    implementation 'androidx.compose.foundation:foundation'
+
+    // Lottie Compose
+    implementation 'com.airbnb.android:lottie-compose:6.3.0'
+
+    // Otras dependencias
     implementation 'com.anton46:stepsview:0.0.2'
-    implementation "androidx.activity:activity-ktx:1.9.0"
     implementation 'com.journeyapps:zxing-android-embedded:4.3.0'
     implementation 'com.cloudinary:cloudinary-android:2.3.1'
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
     implementation 'com.github.gcacace:signature-pad:1.3.1'
-    implementation("com.squareup.okhttp3:okhttp:4.11.0")
-    implementation 'com.google.firebase:firebase-appcheck-playintegrity:17.0.1'
-    implementation 'com.google.firebase:firebase-appcheck-debug:16.0.2'
+    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
 
-
-
-    // 👇 BOM de Firebase (elige la última versión estable)
-    implementation platform('com.google.firebase:firebase-bom:33.1.2')
-
-    // 🔥 Librerías Firebase sin versión
-    implementation 'com.google.firebase:firebase-database'
+    // Firebase
+    implementation platform('com.google.firebase:firebase-bom:33.5.1')
     implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.google.firebase:firebase-database'
     implementation 'com.google.firebase:firebase-firestore'
     implementation 'com.google.firebase:firebase-storage'
+    implementation 'com.google.firebase:firebase-appcheck-playintegrity'
+    implementation 'com.google.firebase:firebase-appcheck-debug'
     implementation 'com.google.android.gms:play-services-location:21.3.0'
 
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 }

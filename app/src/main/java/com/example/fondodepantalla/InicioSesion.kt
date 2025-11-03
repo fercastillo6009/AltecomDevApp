@@ -20,6 +20,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.airbnb.lottie.compose.*
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.firebase.auth.FirebaseAuth
 
 class InicioSesion : ComponentActivity() {
@@ -49,6 +50,19 @@ fun LoginScreen(firebaseAuth: FirebaseAuth) {
     // Lottie animación
     val composition by rememberLottieComposition(LottieCompositionSpec.Asset("iniciosesion.json"))
     val progress by animateLottieCompositionAsState(composition, iterations = LottieConstants.IterateForever)
+
+    // Control de status bar y barra de navegación
+    val systemUiController = rememberSystemUiController()
+    SideEffect {
+        systemUiController.setStatusBarColor(
+            color = Color.Transparent,
+            darkIcons = false // iconos claros
+        )
+        systemUiController.setNavigationBarColor(
+            color = Color.Transparent,
+            darkIcons = false // iconos claros
+        )
+    }
 
     Box(
         modifier = Modifier

@@ -11,18 +11,27 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewAnimationUtils;
+import android.view.ViewGroup;
+import android.view.animation.LinearInterpolator;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.fondodepantalla.FragmentosAdministrador.InicioAdmin;
 import com.example.fondodepantalla.FragmentosAdministrador.ListaAdmin;
 import com.example.fondodepantalla.FragmentosAdministrador.PerfilAdmin;
@@ -37,7 +46,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+
 import java.util.Calendar;
+import java.util.Random;
 
 public class MainActivityAdministrador extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -47,6 +58,12 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
 
     private static final String PREFS_NAME = "SesionPrefs";
     private static final String KEY_TOAST_MOSTRADO = "toastMostrado";
+    private int tapCount = 0;
+    private long lastTapTime = 0;
+    private static final int TAP_THRESHOLD = 10;
+    private static final long RESET_DELAY = 2000;
+    private Toast toast;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,6 +152,34 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
         View headerView = navigationView.getHeaderView(0);
         AppCompatImageView logo = headerView.findViewById(R.id.logo_encabezado);
         logo.setImageResource(getLogoPorMes());
+
+        logo.setOnClickListener(v -> {
+            long currentTime = System.currentTimeMillis();
+
+            // Reiniciar si pasa demasiado tiempo entre toques
+            if (currentTime - lastTapTime > RESET_DELAY) {
+                tapCount = 0;
+            }
+
+            lastTapTime = currentTime;
+            tapCount++;
+
+            // --- Toast persistente ---
+            if (toast != null) toast.cancel();
+            if (tapCount < TAP_THRESHOLD) {
+                int remaining = TAP_THRESHOLD - tapCount;
+                toast = Toast.makeText(this, "Presiona " + remaining + " veces más para activar el modo desarrollador", Toast.LENGTH_SHORT);
+                toast.show();
+            } else if (tapCount == TAP_THRESHOLD) {
+                tapCount = 0;
+                if (toast != null) toast.cancel();
+                toast = Toast.makeText(this, "¡Modo desarrollador activado!", Toast.LENGTH_SHORT);
+                toast.show();
+                startDeveloperEasterEgg();
+            }
+        });
+
+
 
         // Cargar fragmento inicial
         if (savedInstanceState == null) {
@@ -284,5 +329,81 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
             SharedPreferences prefs = getSharedPreferences("AsistenciaPrefs", MODE_PRIVATE);
             prefs.edit().putLong("ultima_apertura", System.currentTimeMillis()).apply();
         }
+    }
+    private void startDeveloperEasterEgg() {
+        ViewGroup rootView = findViewById(android.R.id.content);
+        FrameLayout overlay = new FrameLayout(this);
+        overlay.setBackgroundColor(Color.parseColor("#80000000")); // fondo semitransparente
+        overlay.setAlpha(0f);
+        rootView.addView(overlay, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
+
+        overlay.animate().alpha(1f).setDuration(400).start();
+
+        // Lista de tus GIFs
+        int[] gifs = {
+                R.drawable.khalid,    // camina normal
+                R.drawable.a,
+                R.drawable.b,
+                R.drawable.c,
+                R.drawable.d,
+                R.drawable.e,   // este va derecha → izquierda
+                R.drawable.o       // este baja de arriba hacia abajo
+        };
+
+        // Elegir uno aleatorio
+        int randomIndex = new Random().nextInt(gifs.length);
+        int selectedGif = gifs[randomIndex];
+
+        ImageView gifView = new ImageView(this);
+        gifView.setLayoutParams(new FrameLayout.LayoutParams(250, 250));
+        overlay.addView(gifView);
+
+        Glide.with(this).asGif().load(selectedGif).into(gifView);
+
+        DisplayMetrics dm = getResources().getDisplayMetrics();
+        int screenWidth = dm.widthPixels;
+        int screenHeight = dm.heightPixels;
+        Random random = new Random();
+
+        ObjectAnimator anim;
+
+        if (selectedGif == R.drawable.o) {
+            // 🔹 Este baja verticalmente
+            float randomX = random.nextInt(screenWidth - 300);
+            gifView.setX(randomX);
+            gifView.setY(-300f);
+            anim = ObjectAnimator.ofFloat(gifView, "y", -300f, screenHeight + 300f);
+
+        } else if (selectedGif == R.drawable.e) {
+            // 🔹 Este camina de derecha a izquierda
+            float randomY = random.nextInt(screenHeight / 2) + 100;
+            gifView.setY(randomY);
+            gifView.setX(screenWidth + 300f);
+            anim = ObjectAnimator.ofFloat(gifView, "x", screenWidth + 300f, -300f);
+
+        } else {
+            // 🔹 Los demás caminan de izquierda a derecha, pero con alturas aleatorias
+            float randomY = random.nextInt(screenHeight / 2) + 100;
+            gifView.setY(randomY);
+            gifView.setX(-300f);
+            anim = ObjectAnimator.ofFloat(gifView, "x", -300f, screenWidth + 300f);
+        }
+
+        anim.setDuration(6000 + random.nextInt(4000)); // velocidad aleatoria
+        anim.setInterpolator(new LinearInterpolator());
+
+        anim.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                gifView.animate().alpha(0f).setDuration(800).start();
+                overlay.animate().alpha(0f).setDuration(800)
+                        .withEndAction(() -> ((ViewGroup) rootView).removeView(overlay))
+                        .start();
+            }
+        });
+
+        anim.start();
     }
 }

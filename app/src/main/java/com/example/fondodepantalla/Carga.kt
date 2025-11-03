@@ -17,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
@@ -28,6 +29,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.delay
 import java.util.*
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 class Carga : ComponentActivity() {
 
@@ -45,16 +47,36 @@ class Carga : ComponentActivity() {
         val context = LocalContext.current
         val chocoCooky = FontFamily.Cursive
 
+        // Control de status bar y barra de navegación
+        val systemUiController = rememberSystemUiController()
+        SideEffect {
+            systemUiController.setStatusBarColor(
+                color = Color.Transparent,
+                darkIcons = false // iconos claros
+            )
+            systemUiController.setNavigationBarColor(
+                color = Color.Transparent,
+                darkIcons = false // iconos claros
+            )
+        }
+
         // Lottie animación
         val composition by rememberLottieComposition(LottieCompositionSpec.Asset("carga_animacion.json"))
         val progress by animateLottieCompositionAsState(composition, iterations = LottieConstants.IterateForever)
 
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0xFF2F78AF)), // Fondo azul
+            modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
+            // Fondo con PNG
+            Image(
+                painter = painterResource(id = R.drawable.background_log),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+
+            // Contenido encima del fondo
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
@@ -73,7 +95,7 @@ class Carga : ComponentActivity() {
                     text = context.getString(R.string.app_name),
                     fontFamily = chocoCooky,
                     fontSize = 24.sp,
-                    color = Color(0xFFFDF9EA)
+                    color = Color.White
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -82,7 +104,7 @@ class Carga : ComponentActivity() {
                     text = context.getString(R.string.desarrollador),
                     fontFamily = chocoCooky,
                     fontSize = 18.sp,
-                    color = Color(0xFFFDF9EB)
+                    color = Color.White
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))

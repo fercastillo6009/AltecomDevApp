@@ -45,6 +45,10 @@ import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Random;
+
 
 
 import java.util.Calendar;
@@ -330,6 +334,9 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
             prefs.edit().putLong("ultima_apertura", System.currentTimeMillis()).apply();
         }
     }
+    // Variable global (fuera del método, en tu Activity)
+    private List<Integer> gifPool = new ArrayList<>();
+
     private void startDeveloperEasterEgg() {
         ViewGroup rootView = findViewById(android.R.id.content);
         FrameLayout overlay = new FrameLayout(this);
@@ -341,20 +348,29 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
 
         overlay.animate().alpha(1f).setDuration(400).start();
 
-        // Lista de tus GIFs
+        // Lista de todos tus GIFs
         int[] gifs = {
-                R.drawable.khalid,    // camina normal
+                R.drawable.khalid, // normal (izq→der)
                 R.drawable.a,
                 R.drawable.b,
                 R.drawable.c,
                 R.drawable.d,
-                R.drawable.e,   // este va derecha → izquierda
-                R.drawable.o       // este baja de arriba hacia abajo
+                R.drawable.e,       // derecha → izquierda
+                R.drawable.o,       // arriba → abajo
+                R.drawable.g,       // derecha → izquierda
+                R.drawable.h,       // derecha → izquierda
+                R.drawable.i,       // derecha → izquierda
+                R.drawable.p        // abajo → arriba
         };
 
-        // Elegir uno aleatorio
-        int randomIndex = new Random().nextInt(gifs.length);
-        int selectedGif = gifs[randomIndex];
+        // 🔹 Reiniciar el pool cuando se vacíe
+        if (gifPool.isEmpty()) {
+            for (int gif : gifs) gifPool.add(gif);
+        }
+
+        // 🔹 Elegir aleatoriamente uno que aún no haya salido
+        int randomIndex = new Random().nextInt(gifPool.size());
+        int selectedGif = gifPool.remove(randomIndex);
 
         ImageView gifView = new ImageView(this);
         gifView.setLayoutParams(new FrameLayout.LayoutParams(250, 250));
@@ -370,28 +386,39 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
         ObjectAnimator anim;
 
         if (selectedGif == R.drawable.o) {
-            // 🔹 Este baja verticalmente
+            // 🔹 De arriba hacia abajo
             float randomX = random.nextInt(screenWidth - 300);
             gifView.setX(randomX);
             gifView.setY(-300f);
             anim = ObjectAnimator.ofFloat(gifView, "y", -300f, screenHeight + 300f);
 
-        } else if (selectedGif == R.drawable.e) {
-            // 🔹 Este camina de derecha a izquierda
+        } else if (selectedGif == R.drawable.e ||
+                selectedGif == R.drawable.g ||
+                selectedGif == R.drawable.h ||
+                selectedGif == R.drawable.i) {
+            // 🔹 De derecha a izquierda
             float randomY = random.nextInt(screenHeight / 2) + 100;
             gifView.setY(randomY);
             gifView.setX(screenWidth + 300f);
             anim = ObjectAnimator.ofFloat(gifView, "x", screenWidth + 300f, -300f);
 
+        } else if (selectedGif == R.drawable.p) {
+            // 🔹 De abajo hacia arriba
+            float randomX = random.nextInt(screenWidth - 300);
+            gifView.setX(randomX);
+            gifView.setY(screenHeight + 300f);
+            anim = ObjectAnimator.ofFloat(gifView, "y", screenHeight + 300f, -300f);
+
         } else {
-            // 🔹 Los demás caminan de izquierda a derecha, pero con alturas aleatorias
+            // 🔹 Los demás: de izquierda a derecha
             float randomY = random.nextInt(screenHeight / 2) + 100;
             gifView.setY(randomY);
             gifView.setX(-300f);
             anim = ObjectAnimator.ofFloat(gifView, "x", -300f, screenWidth + 300f);
         }
 
-        anim.setDuration(6000 + random.nextInt(4000)); // velocidad aleatoria
+        // 🔹 Animación
+        anim.setDuration(6000 + random.nextInt(4000));
         anim.setInterpolator(new LinearInterpolator());
 
         anim.addListener(new AnimatorListenerAdapter() {

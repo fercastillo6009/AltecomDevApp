@@ -41,30 +41,33 @@ class RegistrarAdmin : Fragment() {
 
     private val pickImageLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-            uri?.let {
-                // Subir evidencia a Cloudinary
-                MediaManager.get().upload(uri)
-                    .option("folder", "evidencias/${taskId ?: "tarea"}")
-                    .option("use_filename", true)
-                    .option("unique_filename", true)
-                    .callback(object : UploadCallback {
-                        override fun onStart(requestId: String?) {}
-                        override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {}
-                        override fun onSuccess(requestId: String?, resultData: Map<*, *>?) {
-                            Toast.makeText(requireContext(), "Evidencia subida", Toast.LENGTH_SHORT).show()
-                            evidenciaSubida = true
-                        }
-
-                        override fun onError(requestId: String?, error: ErrorInfo?) {
-                            Toast.makeText(
-                                requireContext(),
-                                "Error al subir evidencia: ${error?.description}",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-
-                        override fun onReschedule(requestId: String?, error: ErrorInfo?) {}
-                    }).dispatch()
+            uri?.let { evidenciaUri ->
+                evidenciaUri.let {
+                    // Subir evidencia a Cloudinary
+                    MediaManager.get().upload(evidenciaUri)
+                        .option("folder", "evidencias/${taskId ?: "tarea"}")
+                        .option("use_filename", true)
+                        .option("unique_filename", true)
+                        .callback(object : UploadCallback {
+                            override fun onStart(requestId: String?) {}
+                            override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {}
+                            override fun onSuccess(requestId: String?, resultData: Map<*, *>?) {
+                                val evidenciaUrl = resultData?.get("secure_url") as? String
+                                taskId?.let { id ->
+                                    db.collection("tareas").document(id)
+                                        .update("evidencias", evidenciaUrl) // <-- Aquí se guarda en Firestore
+                                        .addOnSuccessListener {
+                                            Toast.makeText(requireContext(), "Evidencia subida correctamente", Toast.LENGTH_SHORT).show()
+                                            evidenciaSubida = true // Muestra el formulario automáticamente
+                                        }
+                                }
+                            }
+                            override fun onError(requestId: String?, error: ErrorInfo?) {
+                                Toast.makeText(requireContext(), "Error al subir evidencia: ${error?.description}", Toast.LENGTH_SHORT).show()
+                            }
+                            override fun onReschedule(requestId: String?, error: ErrorInfo?) {}
+                        }).dispatch()
+                }
             }
         }
 

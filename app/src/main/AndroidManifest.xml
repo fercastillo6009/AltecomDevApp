@@ -19,12 +19,6 @@
         android:theme="@style/AppTheme.NoActionBar"
         tools:targetApi="31">
 
-        <activity
-            android:name=".FragmentosAdministrador.CaptureAct"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:exported="false"/>
-
 
         <activity
             android:name=".InicioSesion"

@@ -72,8 +72,6 @@ public class PerfilAdmin extends Fragment {
         options.setPrompt("Escanea un código de barras");
         options.setBeepEnabled(true);
         options.setOrientationLocked(true);
-        options.setCaptureActivity(CaptureAct.class); // Clase personalizada si quieres estilo
-
         barcodeLauncher.launch(options);
     }
 

@@ -39,6 +39,7 @@ import com.example.fondodepantalla.FragmentosAdministrador.AsistenciaFragment;
 import com.example.fondodepantalla.FragmentosAdministrador.ResumenFragment;
 import com.example.fondodepantalla.FragmentosAdministrador.AsignarTareaFragment;
 import com.example.fondodepantalla.Utils.AppUpdater;
+import com.google.android.material.bottomnavigation.BottomNavigationView; // Importar BottomNavigationView
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.appcheck.FirebaseAppCheck;
 import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory;
@@ -48,17 +49,19 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Random;
-
-
-
 import java.util.Calendar;
-import java.util.Random;
 
-public class MainActivityAdministrador extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+// Implementamos también el listener para BottomNavigationView
+public class MainActivityAdministrador extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, BottomNavigationView.OnNavigationItemSelectedListener {
 
     DrawerLayout drawerLayout;
     FirebaseAuth firebaseAuth;
     FirebaseUser user;
+    // Nueva variable para BottomNavigationView
+    BottomNavigationView bottomNavigationView;
+    // Variable para guardar el rol
+    private String userRole = "admin"; // Valor predeterminado
+    Toolbar toolbar; // Declarada aquí para accesibilidad global
 
     private static final String PREFS_NAME = "SesionPrefs";
     private static final String KEY_TOAST_MOSTRADO = "toastMostrado";
@@ -86,6 +89,11 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
             anim.setDuration(1400);
             anim.start();
         });
+
+        // Inicializar BottomNavigationView
+        bottomNavigationView = findViewById(R.id.bottom_nav_view);
+        bottomNavigationView.setOnNavigationItemSelectedListener(this);
+        bottomNavigationView.setItemIconTintList(null);
 
         // Inicializar FirebaseAuth y usuario antes de cualquier uso
         firebaseAuth = FirebaseAuth.getInstance();
@@ -116,7 +124,7 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
             }
         }
 
-        Toolbar toolbar = findViewById(R.id.toolbarA);
+        toolbar = findViewById(R.id.toolbarA);
         setSupportActionBar(toolbar);
 
         drawerLayout = findViewById(R.id.drawer_layout_A);
@@ -124,22 +132,70 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setItemIconTintList(null);
 
-        // 🔹 Verificar rol del usuario y ajustar el menú
+        // Inicializar BottomNavigationView
+        bottomNavigationView = findViewById(R.id.bottom_nav_view);
+        bottomNavigationView.setOnNavigationItemSelectedListener(this);
+
+
+        // 🔹 Verificar rol del usuario y ajustar la interfaz (Lógica Asíncrona)
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("usuarios").document(user.getUid()).get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
                         String rol = documentSnapshot.getString("rol");
+                        userRole = rol; // Asignar el rol
                         Menu menu = navigationView.getMenu();
 
                         if ("admin".equals(rol)) {
+                            // **ROL ADMIN: Habilitar Drawer y su Toggle**
+                            bottomNavigationView.setVisibility(View.GONE);
+                            navigationView.setVisibility(View.VISIBLE);
+                            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED); // Habilitar Drawer
+
+                            // 🚨 CRUCIAL: Inicializar el Toggle aquí (después de saber que es Admin)
+                            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                                    MainActivityAdministrador.this, drawerLayout, toolbar,
+                                    R.string.navigation_drawer_open,
+                                    R.string.navigation_drawer_close
+                            );
+                            drawerLayout.addDrawerListener(toggle);
+                            toggle.syncState(); // Sincroniza el estado del toggle (muestra las 3 rayitas)
+
+                            // Ajustar menú del Drawer para Admin
                             menu.findItem(R.id.AsignarTarea).setVisible(true);
-                            menu.findItem(R.id.ResumenAsistencias).setVisible(true); // <-- nuevo
-                            menu.findItem(R.id.ListarAdmin).setVisible(false);
-                        } else {
+                            menu.findItem(R.id.ResumenAsistencias).setVisible(true);
+                            menu.findItem(R.id.ListarAdmin).setVisible(false); // Admin no ve Lista
+
+                            // Cargar fragmento inicial para Admin
+                            if (savedInstanceState == null) {
+                                getSupportFragmentManager().beginTransaction()
+                                        .replace(R.id.fragment_containerA, new InicioAdmin())
+                                        .commit();
+                                navigationView.setCheckedItem(R.id.InicioAdmin);
+                            }
+                        } else { // Rol: "empleado"
+                            // **ROL EMPLEADO: Habilitar Bottom Nav y deshabilitar Drawer**
+                            bottomNavigationView.setVisibility(View.VISIBLE);
+                            navigationView.setVisibility(View.GONE);
+                            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED); // Deshabilitar Drawer
+
+                            // Quitar el botón de navegación/hamburguesa de la Toolbar para empleado
+                            if (getSupportActionBar() != null) {
+                                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                            }
+
+                            // Ocultar todas las opciones de admin en el Drawer (redundante pero seguro)
                             menu.findItem(R.id.AsignarTarea).setVisible(false);
-                            menu.findItem(R.id.ResumenAsistencias).setVisible(false); // <-- oculto para no-admin
-                            menu.findItem(R.id.ListarAdmin).setVisible(true);
+                            menu.findItem(R.id.ResumenAsistencias).setVisible(false);
+                            menu.findItem(R.id.ListarAdmin).setVisible(false); // ListaAdmin en Drawer también se oculta
+
+                            // Cargar fragmento inicial para Empleado
+                            if (savedInstanceState == null) {
+                                getSupportFragmentManager().beginTransaction()
+                                        .replace(R.id.fragment_containerA, new InicioAdmin())
+                                        .commit();
+                                bottomNavigationView.setSelectedItemId(R.id.InicioEmpleado); // Usar ID de BottomNav
+                            }
                         }
                     }
                 })
@@ -147,10 +203,7 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
                         Toast.makeText(this, "Error al verificar el rol", Toast.LENGTH_SHORT).show()
                 );
 
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar,
-                R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
+        // 🚨 IMPORTANTE: Se eliminó el ActionBarDrawerToggle de aquí para evitar conflictos de sincronización
 
         // 🔹 Logo dinámico según mes
         View headerView = navigationView.getHeaderView(0);
@@ -182,16 +235,6 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
                 startDeveloperEasterEgg();
             }
         });
-
-
-
-        // Cargar fragmento inicial
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_containerA, new InicioAdmin())
-                    .commit();
-            navigationView.setCheckedItem(R.id.InicioAdmin);
-        }
 
         ComprobandoInicioSesion();
         AppUpdater.checkForUpdate(this);
@@ -261,40 +304,70 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
     @SuppressLint("MissingSuperCall")
     @Override
     public void onBackPressed() {
-        Toast.makeText(this, "Botón de retroceso deshabilitado", Toast.LENGTH_SHORT).show();
+        // Permitir que el Drawer se cierre si está abierto (solo para Admin)
+        if (drawerLayout.isDrawerOpen(GravityCompat.START) && "admin".equals(userRole)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            Toast.makeText(this, "Botón de retroceso deshabilitado", Toast.LENGTH_SHORT).show();
+        }
     }
 
+    // 🔹 Método para manejar la selección de ítems (tanto para Drawer como para BottomNav)
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.InicioAdmin) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_containerA, new InicioAdmin()).commit();
-        } else if (id == R.id.PerfilAdmin) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_containerA, new PerfilAdmin()).commit();
-        } else if (id == R.id.RegistrarAdmin) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_containerA, new AsistenciaFragment()).commit();
-        } else if (id == R.id.ListarAdmin) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_containerA, new ListaAdmin()).commit();
-        } else if (id == R.id.AsignarTarea) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_containerA, new AsignarTareaFragment())
-                    .addToBackStack(null) // opcional, para poder volver atrás
-                    .commit();
-        } else if (id == R.id.ResumenAsistencias) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_containerA, new ResumenFragment())
-                    .commit();
-        } else if (id == R.id.SalirAdmin) {
-            CerrarSesion();
+        // 1. Lógica para el Drawer (Admin)
+        if ("admin".equals(userRole)) {
+            // Se asume que el ítem pertenece al NavigationView
+            if (id == R.id.InicioAdmin) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_containerA, new InicioAdmin()).commit();
+            } else if (id == R.id.PerfilAdmin) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_containerA, new PerfilAdmin()).commit();
+            } else if (id == R.id.RegistrarAdmin) { // AsistenciaFragment
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_containerA, new AsistenciaFragment()).commit();
+            } else if (id == R.id.ListarAdmin) { // Oculto, pero mantenido por si cambia la lógica futura
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_containerA, new ListaAdmin()).commit();
+            } else if (id == R.id.AsignarTarea) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_containerA, new AsignarTareaFragment())
+                        .addToBackStack(null)
+                        .commit();
+            } else if (id == R.id.ResumenAsistencias) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_containerA, new ResumenFragment())
+                        .commit();
+            } else if (id == R.id.SalirAdmin) {
+                CerrarSesion();
+            }
+
+            // Cerrar Drawer si la selección viene del menú lateral
+            drawerLayout.closeDrawer(GravityCompat.START);
+
+            // 2. Lógica para el Bottom Nav (Empleado)
+        } else if ("empleado".equals(userRole)) {
+            // Se asume que el ítem pertenece al BottomNavigationView
+            if (id == R.id.InicioEmpleado) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_containerA, new InicioAdmin()).commit();
+            } else if (id == R.id.AsistenciaEmpleado) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_containerA, new AsistenciaFragment()).commit();
+            } else if (id == R.id.ListaEmpleado) { // Para ver la lista de registros
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_containerA, new ListaAdmin()).commit();
+            } else if (id == R.id.PerfilEmpleado) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_containerA, new PerfilAdmin()).commit();
+            } else if (id == R.id.SalirEmpleado) {
+                CerrarSesion();
+            }
         }
 
-        item.setChecked(true);
-        drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
 

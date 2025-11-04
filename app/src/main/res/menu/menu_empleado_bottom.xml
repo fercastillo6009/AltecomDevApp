@@ -1,0 +1,26 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/InicioEmpleado"
+        android:icon="@drawable/ic_home"
+        android:title="Inicio" />
+
+    <item
+        android:id="@+id/AsistenciaEmpleado"
+        android:icon="@drawable/ic_asist"
+        android:title="Asistencia" />
+
+    <item
+        android:id="@+id/ListaEmpleado"
+        android:icon="@drawable/ic_task_1"
+        android:title="Tareas" />
+
+    <item
+        android:id="@+id/PerfilEmpleado"
+        android:icon="@drawable/ic_invent"
+        android:title="Inventario" />
+
+    <item
+        android:id="@+id/SalirEmpleado"
+        android:icon="@drawable/ic_exit"
+        android:title="Salir" />
+</menu>

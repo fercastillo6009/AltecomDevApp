@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+// ... (El resto de tus imports: Animator, Intent, SharedPreferences, etc.)
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
@@ -38,8 +39,9 @@ import com.example.fondodepantalla.FragmentosAdministrador.PerfilAdmin;
 import com.example.fondodepantalla.FragmentosAdministrador.AsistenciaFragment;
 import com.example.fondodepantalla.FragmentosAdministrador.ResumenFragment;
 import com.example.fondodepantalla.FragmentosAdministrador.AsignarTareaFragment;
+import com.example.fondodepantalla.FragmentosAdministrador.CrearUsuarioFragment;
 import com.example.fondodepantalla.Utils.AppUpdater;
-import com.google.android.material.bottomnavigation.BottomNavigationView; // Importar BottomNavigationView
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.appcheck.FirebaseAppCheck;
 import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory;
@@ -51,68 +53,59 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.Calendar;
 
-// Implementamos también el listener para BottomNavigationView
 public class MainActivityAdministrador extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, BottomNavigationView.OnNavigationItemSelectedListener {
 
     DrawerLayout drawerLayout;
     FirebaseAuth firebaseAuth;
     FirebaseUser user;
-    // Nueva variable para BottomNavigationView
     BottomNavigationView bottomNavigationView;
-    // Variable para guardar el rol
-    private String userRole = "admin"; // Valor predeterminado
-    Toolbar toolbar; // Declarada aquí para accesibilidad global
+    private String userRole = "admin";
+    Toolbar toolbar;
 
     private static final String PREFS_NAME = "SesionPrefs";
     private static final String KEY_TOAST_MOSTRADO = "toastMostrado";
+    // ... (tus otras variables: tapCount, lastTapTime, etc.)
     private int tapCount = 0;
     private long lastTapTime = 0;
     private static final int TAP_THRESHOLD = 10;
     private static final long RESET_DELAY = 2000;
     private Toast toast;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_administrador);
 
-        final View rootView = findViewById(R.id.rootLayout); // rootLayout es tu contenedor principal
-        rootView.setVisibility(View.INVISIBLE);
-
-        rootView.post(() -> {
-            int cx = getIntent().getIntExtra("cx", rootView.getWidth()/2);
-            int cy = getIntent().getIntExtra("cy", rootView.getHeight()/2);
-            float finalRadius = (float) Math.hypot(rootView.getWidth(), rootView.getHeight());
-            Animator anim = ViewAnimationUtils.createCircularReveal(rootView, cx, cy, 0f, finalRadius);
-            rootView.setVisibility(View.VISIBLE);
-            anim.setDuration(1400);
-            anim.start();
-        });
+        // 🛑 --- ANIMACIÓN CIRCULAR ELIMINADA --- 🛑
+        // Se ha quitado el bloque de código de "createCircularReveal"
+        // que usaba 'rootView.setVisibility(View.INVISIBLE)'
+        // para prevenir el parpadeo y permitir la transición "fade_in".
+        // 🛑 --------------------------------------- 🛑
 
         // Inicializar BottomNavigationView
         bottomNavigationView = findViewById(R.id.bottom_nav_view);
         bottomNavigationView.setOnNavigationItemSelectedListener(this);
         bottomNavigationView.setItemIconTintList(null);
 
-        // Inicializar FirebaseAuth y usuario antes de cualquier uso
+        // Inicializar FirebaseAuth y usuario
         firebaseAuth = FirebaseAuth.getInstance();
         user = firebaseAuth.getCurrentUser();
 
-        //app check para pruebas
+        // App check
         FirebaseAppCheck firebaseAppCheck = FirebaseAppCheck.getInstance();
         firebaseAppCheck.installAppCheckProviderFactory(
                 DebugAppCheckProviderFactory.getInstance()
         );
 
-        // Si el usuario es nulo, redirigir al login y salir
+        // Si el usuario es nulo, redirigir
         if (user == null) {
+            // (Esta lógica de 'cerrar sesión' es solo de seguridad, no necesita flags)
             startActivity(new Intent(MainActivityAdministrador.this, InicioSesion.class));
             finish();
             return;
         }
 
-        // Permisos de notificación (Android 13+)
+        // Permisos de notificación
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -124,23 +117,27 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
             }
         }
 
+        // Toolbar
         toolbar = findViewById(R.id.toolbarA);
         setSupportActionBar(toolbar);
 
+        // Drawer
         drawerLayout = findViewById(R.id.drawer_layout_A);
         NavigationView navigationView = findViewById(R.id.nav_viewA);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setItemIconTintList(null);
 
-        // Inicializar BottomNavigationView
+        // Bottom Nav
         bottomNavigationView = findViewById(R.id.bottom_nav_view);
         bottomNavigationView.setOnNavigationItemSelectedListener(this);
 
 
-        // 🔹 Verificar rol del usuario y ajustar la interfaz (Lógica Asíncrona)
+        // 🔹 Verificar rol del usuario (Lógica Asíncrona)
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("usuarios").document(user.getUid()).get()
                 .addOnSuccessListener(documentSnapshot -> {
+                    // ... (Toda tu lógica de roles para admin/empleado) ...
+                    // (Esta parte se queda exactamente igual)
                     if (documentSnapshot.exists()) {
                         String rol = documentSnapshot.getString("rol");
                         userRole = rol; // Asignar el rol
@@ -164,7 +161,8 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
                             // Ajustar menú del Drawer para Admin
                             menu.findItem(R.id.AsignarTarea).setVisible(true);
                             menu.findItem(R.id.ResumenAsistencias).setVisible(true);
-                            menu.findItem(R.id.ListarAdmin).setVisible(false); // Admin no ve Lista
+                            menu.findItem(R.id.CrearUsuario).setVisible(true);
+                            menu.findItem(R.id.ListarAdmin).setVisible(false);
 
                             // Cargar fragmento inicial para Admin
                             if (savedInstanceState == null) {
@@ -184,10 +182,11 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
                                 getSupportActionBar().setDisplayHomeAsUpEnabled(false);
                             }
 
-                            // Ocultar todas las opciones de admin en el Drawer (redundante pero seguro)
+                            // Ocultar todas las opciones de admin en el Drawer
                             menu.findItem(R.id.AsignarTarea).setVisible(false);
                             menu.findItem(R.id.ResumenAsistencias).setVisible(false);
-                            menu.findItem(R.id.ListarAdmin).setVisible(false); // ListaAdmin en Drawer también se oculta
+                            menu.findItem(R.id.CrearUsuario).setVisible(false);
+                            menu.findItem(R.id.ListarAdmin).setVisible(false);
 
                             // Cargar fragmento inicial para Empleado
                             if (savedInstanceState == null) {
@@ -203,17 +202,16 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
                         Toast.makeText(this, "Error al verificar el rol", Toast.LENGTH_SHORT).show()
                 );
 
-        // 🚨 IMPORTANTE: Se eliminó el ActionBarDrawerToggle de aquí para evitar conflictos de sincronización
 
-        // 🔹 Logo dinámico según mes
+        // 🔹 Logo dinámico y Easter Egg
         View headerView = navigationView.getHeaderView(0);
         AppCompatImageView logo = headerView.findViewById(R.id.logo_encabezado);
         logo.setImageResource(getLogoPorMes());
 
         logo.setOnClickListener(v -> {
+            // ... (Tu lógica del Easter Egg, sin cambios) ...
             long currentTime = System.currentTimeMillis();
 
-            // Reiniciar si pasa demasiado tiempo entre toques
             if (currentTime - lastTapTime > RESET_DELAY) {
                 tapCount = 0;
             }
@@ -221,7 +219,6 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
             lastTapTime = currentTime;
             tapCount++;
 
-            // --- Toast persistente ---
             if (toast != null) toast.cancel();
             if (tapCount < TAP_THRESHOLD) {
                 int remaining = TAP_THRESHOLD - tapCount;
@@ -239,7 +236,7 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
         ComprobandoInicioSesion();
         AppUpdater.checkForUpdate(this);
 
-        //Iniciar pings automáticos cada 50 segundos
+        //Iniciar pings automáticos
         iniciarPingPeriodico();
     }
 
@@ -248,6 +245,7 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
     private final Runnable pingRunnable = new Runnable() {
         @Override
         public void run() {
+            // ... (Tu lógica de Ping, sin cambios) ...
             new Thread(() -> {
                 try {
                     java.net.URL url = new java.net.URL("https://altecomasistencia.onrender.com/");
@@ -262,7 +260,6 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
 
                     runOnUiThread(() -> {
                         if (responseCode == 200) {
-                            // Puedes quitar este log si no quieres mostrar nada
                             System.out.println("✅ Ping exitoso");
                         } else {
                             System.out.println("⚠️ Ping falló con código: " + responseCode);
@@ -272,8 +269,6 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
                     e.printStackTrace();
                 }
             }).start();
-
-            // Repetir cada 50 segundos (50000 ms)
             handlerPing.postDelayed(this, 50000);
         }
     };
@@ -285,11 +280,12 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Detiene los pings cuando se cierra la actividad
         handlerPing.removeCallbacks(pingRunnable);
     }
+
     //Logo por mes
     private int getLogoPorMes() {
+        // ... (Tu lógica de getLogoPorMes, sin cambios) ...
         int mes = Calendar.getInstance().get(Calendar.MONTH) + 1;
         switch (mes) {
             case 2:  return R.drawable.logofeb;
@@ -301,10 +297,11 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
         }
     }
 
+    //onBackPressed
     @SuppressLint("MissingSuperCall")
     @Override
     public void onBackPressed() {
-        // Permitir que el Drawer se cierre si está abierto (solo para Admin)
+        // ... (Tu lógica de onBackPressed, sin cambios) ...
         if (drawerLayout.isDrawerOpen(GravityCompat.START) && "admin".equals(userRole)) {
             drawerLayout.closeDrawer(GravityCompat.START);
         } else {
@@ -312,24 +309,27 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
         }
     }
 
-    // 🔹 Método para manejar la selección de ítems (tanto para Drawer como para BottomNav)
+    // onNavigationItemSelected
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
 
         // 1. Lógica para el Drawer (Admin)
         if ("admin".equals(userRole)) {
-            // Se asume que el ítem pertenece al NavigationView
+            // ... (Tu lógica de navegación de Admin) ...
             if (id == R.id.InicioAdmin) {
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment_containerA, new InicioAdmin()).commit();
             } else if (id == R.id.PerfilAdmin) {
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment_containerA, new PerfilAdmin()).commit();
-            } else if (id == R.id.RegistrarAdmin) { // AsistenciaFragment
+            } else if (id == R.id.CrearUsuario) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_containerA, new CrearUsuarioFragment()).commit();
+            } else if (id == R.id.RegistrarAdmin) {
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment_containerA, new AsistenciaFragment()).commit();
-            } else if (id == R.id.ListarAdmin) { // Oculto, pero mantenido por si cambia la lógica futura
+            } else if (id == R.id.ListarAdmin) {
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment_containerA, new ListaAdmin()).commit();
             } else if (id == R.id.AsignarTarea) {
@@ -342,29 +342,28 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
                         .replace(R.id.fragment_containerA, new ResumenFragment())
                         .commit();
             } else if (id == R.id.SalirAdmin) {
-                CerrarSesion();
+                CerrarSesion(); // *** LLAMA AL MÉTODO CORREGIDO ***
             }
 
-            // Cerrar Drawer si la selección viene del menú lateral
             drawerLayout.closeDrawer(GravityCompat.START);
 
             // 2. Lógica para el Bottom Nav (Empleado)
         } else if ("empleado".equals(userRole)) {
-            // Se asume que el ítem pertenece al BottomNavigationView
+            // ... (Tu lógica de navegación de Empleado) ...
             if (id == R.id.InicioEmpleado) {
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment_containerA, new InicioAdmin()).commit();
             } else if (id == R.id.AsistenciaEmpleado) {
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment_containerA, new AsistenciaFragment()).commit();
-            } else if (id == R.id.ListaEmpleado) { // Para ver la lista de registros
+            } else if (id == R.id.ListaEmpleado) {
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment_containerA, new ListaAdmin()).commit();
             } else if (id == R.id.PerfilEmpleado) {
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment_containerA, new PerfilAdmin()).commit();
             } else if (id == R.id.SalirEmpleado) {
-                CerrarSesion();
+                CerrarSesion(); // *** LLAMA AL MÉTODO CORREGIDO ***
             }
         }
 
@@ -372,6 +371,7 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
     }
 
     private void ComprobandoInicioSesion() {
+        // ... (Tu lógica de ComprobandoInicioSesion, sin cambios) ...
         if (user != null) {
             SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
             boolean toastMostrado = prefs.getBoolean(KEY_TOAST_MOSTRADO, false);
@@ -385,19 +385,41 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
         }
     }
 
+
+    // ⭐️ --- MÉTODO CERRAR SESIÓN CORREGIDO --- ⭐️
+    // Esta es la corrección para el problema de la pila de navegación (back stack)
     private void CerrarSesion() {
+        // 1. Cierra la sesión de Firebase
         firebaseAuth.signOut();
+
+        // 2. Limpia las SharedPreferences
         getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
                 .edit()
                 .putBoolean(KEY_TOAST_MOSTRADO, false)
                 .apply();
-        startActivity(new Intent(MainActivityAdministrador.this, InicioSesion.class));
+
+        // 3. Muestra el Toast
         Toast.makeText(this, "Cerraste sesión exitosamente", Toast.LENGTH_SHORT).show();
+
+        // 4. Prepara el Intent para ir a InicioSesion
+        Intent intent = new Intent(MainActivityAdministrador.this, InicioSesion.class);
+
+        // 5. AÑADE BANDERAS PARA LIMPIAR LA PILA DE NAVEGACIÓN
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+        // 6. Inicia la actividad de login
+        startActivity(intent);
+
+        // 7. CIERRA LA ACTIVIDAD ACTUAL
+        finish();
     }
+    // ⭐️ --- FIN DEL MÉTODO CORREGIDO --- ⭐️
+
 
     @Override
     protected void onStart() {
         super.onStart();
+        // ... (Tu lógica de onStart, sin cambios) ...
         user = firebaseAuth.getCurrentUser();
         if (user == null) {
             startActivity(new Intent(MainActivityAdministrador.this, InicioSesion.class));
@@ -407,13 +429,15 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
             prefs.edit().putLong("ultima_apertura", System.currentTimeMillis()).apply();
         }
     }
-    // Variable global (fuera del método, en tu Activity)
+
+    // ... (Tu lógica del Easter Egg: variable gifPool y startDeveloperEasterEgg) ...
+    // (Esta parte se queda exactamente igual)
     private List<Integer> gifPool = new ArrayList<>();
 
     private void startDeveloperEasterEgg() {
         ViewGroup rootView = findViewById(android.R.id.content);
         FrameLayout overlay = new FrameLayout(this);
-        overlay.setBackgroundColor(Color.parseColor("#80000000")); // fondo semitransparente
+        overlay.setBackgroundColor(Color.parseColor("#80000000"));
         overlay.setAlpha(0f);
         rootView.addView(overlay, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -421,27 +445,24 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
 
         overlay.animate().alpha(1f).setDuration(400).start();
 
-        // Lista de todos tus GIFs
         int[] gifs = {
-                R.drawable.khalid, // normal (izq→der)
+                R.drawable.khalid,
                 R.drawable.a,
                 R.drawable.b,
                 R.drawable.c,
                 R.drawable.d,
-                R.drawable.e,       // derecha → izquierda
-                R.drawable.o,       // arriba → abajo
-                R.drawable.g,       // derecha → izquierda
-                R.drawable.h,       // derecha → izquierda
-                R.drawable.i,       // derecha → izquierda
-                R.drawable.p        // abajo → arriba
+                R.drawable.e,
+                R.drawable.o,
+                R.drawable.g,
+                R.drawable.h,
+                R.drawable.i,
+                R.drawable.p
         };
 
-        // 🔹 Reiniciar el pool cuando se vacíe
         if (gifPool.isEmpty()) {
             for (int gif : gifs) gifPool.add(gif);
         }
 
-        // 🔹 Elegir aleatoriamente uno que aún no haya salido
         int randomIndex = new Random().nextInt(gifPool.size());
         int selectedGif = gifPool.remove(randomIndex);
 
@@ -459,7 +480,6 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
         ObjectAnimator anim;
 
         if (selectedGif == R.drawable.o) {
-            // 🔹 De arriba hacia abajo
             float randomX = random.nextInt(screenWidth - 300);
             gifView.setX(randomX);
             gifView.setY(-300f);
@@ -469,28 +489,24 @@ public class MainActivityAdministrador extends AppCompatActivity implements Navi
                 selectedGif == R.drawable.g ||
                 selectedGif == R.drawable.h ||
                 selectedGif == R.drawable.i) {
-            // 🔹 De derecha a izquierda
             float randomY = random.nextInt(screenHeight / 2) + 100;
             gifView.setY(randomY);
             gifView.setX(screenWidth + 300f);
             anim = ObjectAnimator.ofFloat(gifView, "x", screenWidth + 300f, -300f);
 
         } else if (selectedGif == R.drawable.p) {
-            // 🔹 De abajo hacia arriba
             float randomX = random.nextInt(screenWidth - 300);
             gifView.setX(randomX);
             gifView.setY(screenHeight + 300f);
             anim = ObjectAnimator.ofFloat(gifView, "y", screenHeight + 300f, -300f);
 
         } else {
-            // 🔹 Los demás: de izquierda a derecha
             float randomY = random.nextInt(screenHeight / 2) + 100;
             gifView.setY(randomY);
             gifView.setX(-300f);
             anim = ObjectAnimator.ofFloat(gifView, "x", -300f, screenWidth + 300f);
         }
 
-        // 🔹 Animación
         anim.setDuration(6000 + random.nextInt(4000));
         anim.setInterpolator(new LinearInterpolator());
 

@@ -3,7 +3,7 @@ package com.example.fondodepantalla.FragmentosAdministrador;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.location.Location;
-
+import androidx.annotation.Nullable;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 
@@ -18,7 +18,9 @@ public class LocationHelper {
     @SuppressLint("MissingPermission")
     public void getCurrentLocation(OnLocationResultListener listener) {
         fusedLocationClient.getLastLocation()
+                // 'location' aquí PUEDE ser nulo si no hay última ubicación conocida
                 .addOnSuccessListener(location -> listener.onLocationResult(location))
+                // Aquí envías 'null' explícitamente en caso de fallo
                 .addOnFailureListener(e -> listener.onLocationResult(null));
     }
 
@@ -33,6 +35,8 @@ public class LocationHelper {
     }
 
     public interface OnLocationResultListener {
-        void onLocationResult(Location location);
+        // 🌟 CORRECCIÓN: Añadir '@Nullable' para permitir valores nulos
+        // Esto soluciona la incompatibilidad entre el listener y la implementación
+        void onLocationResult(@Nullable Location location);
     }
 }

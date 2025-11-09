@@ -1,9 +1,5 @@
-package com.example.fondodepantalla.FragmentosAdministrador
+package com.example.fondodepantalla.screens // 1. Paquete actualizado
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -21,42 +17,18 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-
-
-class CrearUsuarioFragment : Fragment() {
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        return androidx.compose.ui.platform.ComposeView(requireContext()).apply {
-            setContent {
-                // Uso de el tema de Material 3 para un diseño pulido
-                MaterialTheme(
-                    colorScheme = lightColorScheme(
-                        primary = Color(0xFF2F78AF),
-                        onPrimary = Color.White,
-                        error = Color(0xFFD32F2F)
-                    )
-                ) {
-                    AdminUserRegistrationScreen()
-                }
-            }
-        }
-    }
-}
+// 2. Importaciones de Fragment, View, Bundle, etc., eliminadas.
 
 @Composable
-fun AdminUserRegistrationScreen() {
+fun CrearUsuarioScreen() { // 3. Función renombrada (antes AdminUserRegistrationScreen)
     // 1. Inicialización de Firebase (se asume que la app ya fue inicializada)
     val auth = remember { FirebaseAuth.getInstance() }
     val db = remember { FirebaseFirestore.getInstance() }
@@ -100,6 +72,7 @@ fun AdminUserRegistrationScreen() {
 
                 if (uid != null) {
                     // PASO 2: Guardar los datos del usuario en Firestore
+                    // 4. Se respeta tu estructura de datos
                     val userData = hashMapOf(
                         "correo" to email,
                         "nombre" to name,
@@ -130,13 +103,14 @@ fun AdminUserRegistrationScreen() {
     }
 
     // --- Estructura de la UI con desplazamiento para dispositivos pequeños ---
+    // 5. Se elimina el MaterialTheme wrapper
     Scaffold { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(horizontal = 24.dp)
-                .imePadding(),
+                .imePadding(), // imePadding es genial para manejar el teclado
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
@@ -171,7 +145,7 @@ fun AdminUserRegistrationScreen() {
                 onValueChange = { email = it },
                 label = { Text("Correo Electrónico") },
                 leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
-                keyboardOptions = KeyboardOptions( // <-- USO SIMPLIFICADO
+                keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email
                 ),
                 shape = RoundedCornerShape(12.dp),
@@ -185,7 +159,7 @@ fun AdminUserRegistrationScreen() {
                 onValueChange = { password = it },
                 label = { Text("Contraseña (mín. 6 caracteres)") },
                 leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
-                keyboardOptions = KeyboardOptions( // <-- USO SIMPLIFICADO
+                keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password
                 ),
                 visualTransformation = PasswordVisualTransformation(),

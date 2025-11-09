@@ -1,50 +1,34 @@
-package com.example.fondodepantalla.FragmentosAdministrador
+package com.example.fondodepantalla.screens // 1. Paquete actualizado
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.Fragment
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+// 2. Imports de Fragment, LayoutInflater, View, etc., eliminados
 
-class InicioAdmin : Fragment() {
-
-    private val db = FirebaseFirestore.getInstance()
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View = ComposeView(requireContext()).apply {
-        setContent {
-            MaterialTheme {
-                Surface(modifier = Modifier.fillMaxSize()) {
-                    InicioAdminScreen(db)
-                }
-            }
-        }
-    }
-}
+// 3. La clase 'InicioAdmin : Fragment' ha sido eliminada
 
 @Composable
-fun InicioAdminScreen(db: FirebaseFirestore) {
+fun InicioAdminScreen() { // 4. 'db' ya no es un parámetro
+
+    // 5. 'db' se inicializa aquí dentro usando 'remember'
+    val db = remember { FirebaseFirestore.getInstance() }
+
     var tareas by remember { mutableStateOf(listOf<Int>()) }
     var inventario by remember { mutableStateOf(listOf<Pair<String, Int>>()) }
 
-    LaunchedEffect(Unit) {
+    // 6. LaunchedEffect ahora usa 'db' como 'key'
+    LaunchedEffect(db) {
         tareas = cargarTareas(db)
         inventario = cargarInventario(db)
     }
@@ -60,11 +44,13 @@ fun InicioAdminScreen(db: FirebaseFirestore) {
     ) {
         Text("Panel general", style = MaterialTheme.typography.titleLarge)
 
+        // 7. El 'Surface' y 'MaterialTheme' del Fragmento se eliminan,
+        // ya que el NavHost proveerá el tema.
         if (tareas.isEmpty() && inventario.isEmpty()) {
             CircularProgressIndicator()
         } else {
             if (tareas.isNotEmpty()) {
-                TarjetaGrafico(
+                TarjetaGrafico( // Llama a la función privada
                     titulo = "Progreso de tareas",
                     etiquetas = listOf("Completadas", "En proceso", "Faltantes"),
                     valores = tareas
@@ -72,7 +58,7 @@ fun InicioAdminScreen(db: FirebaseFirestore) {
             }
 
             if (inventario.isNotEmpty()) {
-                TarjetaGraficoBarras(
+                TarjetaGraficoBarras( // Llama a la función privada
                     titulo = "Inventario general",
                     datos = inventario
                 )
@@ -81,9 +67,10 @@ fun InicioAdminScreen(db: FirebaseFirestore) {
     }
 }
 
-// -------------------- FIRESTORE --------------------
+// -------------------- FIRESTORE (Privado) --------------------
 
-suspend fun cargarTareas(db: FirebaseFirestore): List<Int> {
+// 8. Funciones de lógica de datos ahora privadas
+private suspend fun cargarTareas(db: FirebaseFirestore): List<Int> {
     val snapshot = db.collection("tareas").get().await()
     var completadas = 0
     var enProceso = 0
@@ -103,7 +90,7 @@ suspend fun cargarTareas(db: FirebaseFirestore): List<Int> {
     return listOf(completadas, enProceso, faltantes)
 }
 
-suspend fun cargarInventario(db: FirebaseFirestore): List<Pair<String, Int>> {
+private suspend fun cargarInventario(db: FirebaseFirestore): List<Pair<String, Int>> {
     val snapshot = db.collection("inventario").get().await()
     return snapshot.mapNotNull {
         val nombre = it.getString("nombre")
@@ -112,10 +99,11 @@ suspend fun cargarInventario(db: FirebaseFirestore): List<Pair<String, Int>> {
     }
 }
 
-// -------------------- UI --------------------
+// -------------------- UI (Privado) --------------------
 
+// 9. Funciones de UI auxiliares ahora privadas
 @Composable
-fun TarjetaGrafico(titulo: String, etiquetas: List<String>, valores: List<Int>) {
+private fun TarjetaGrafico(titulo: String, etiquetas: List<String>, valores: List<Int>) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface),
@@ -128,13 +116,13 @@ fun TarjetaGrafico(titulo: String, etiquetas: List<String>, valores: List<Int>) 
         ) {
             Text(titulo, style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(4.dp))
-            AnimatedBarChart(etiquetas, valores)
+            AnimatedBarChart(etiquetas, valores) // Llama a la función privada
         }
     }
 }
 
 @Composable
-fun TarjetaGraficoBarras(titulo: String, datos: List<Pair<String, Int>>) {
+private fun TarjetaGraficoBarras(titulo: String, datos: List<Pair<String, Int>>) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface),
@@ -146,13 +134,13 @@ fun TarjetaGraficoBarras(titulo: String, datos: List<Pair<String, Int>>) {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(titulo, style = MaterialTheme.typography.titleMedium)
-            AnimatedBarChart(datos.map { it.first }, datos.map { it.second })
+            AnimatedBarChart(datos.map { it.first }, datos.map { it.second }) // Llama a la función privada
         }
     }
 }
 
 @Composable
-fun AnimatedBarChart(labels: List<String>, values: List<Int>) {
+private fun AnimatedBarChart(labels: List<String>, values: List<Int>) {
     val maxValue = values.maxOrNull()?.toFloat() ?: 1f
     val pastelColors = listOf(
         Color(0xFFBAFFC9), Color(0xFFFFFFBA), Color(0xFFFFBABA),
@@ -174,7 +162,7 @@ fun AnimatedBarChart(labels: List<String>, values: List<Int>) {
                 Text(
                     text = labels[index],
                     modifier = Modifier.width(110.dp),
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme. typography.bodyMedium
                 )
 
                 Box(

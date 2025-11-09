@@ -1,11 +1,8 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.example.fondodepantalla.FragmentosAdministrador
+package com.example.fondodepantalla.screens // 1. Paquete actualizado
 
-import android.content.Context
-import android.os.Bundle
 import android.widget.Toast
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,69 +15,77 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext // 2. Importación añadida
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.Fragment
 import com.google.firebase.firestore.FirebaseFirestore
-// Asegúrate de que AsistenciaManager y LocationHelper no estén aquí para evitar errores de compilación
-// ...
+// 3. Todas las importaciones de Fragment, LayoutInflater, ViewGroup, Bundle y ComposeView han sido eliminadas.
 
-// Color Primario Personalizado
+
+// Color Primario Personalizado (Sin cambios)
 val CustomPrimary = Color(0xFF2F78AF)
 
 @Composable
 fun CustomTaskTheme(content: @Composable () -> Unit) {
     val customColorScheme = lightColorScheme(
         primary = CustomPrimary,
-        primaryContainer = CustomPrimary.copy(alpha = 0.15f), // Contenedor más claro para el encabezado
+        primaryContainer = CustomPrimary.copy(alpha = 0.15f),
         onPrimaryContainer = CustomPrimary.copy(alpha = 0.9f),
-        // Puedes definir otros colores si es necesario, pero estos son clave para el cambio
     )
     MaterialTheme(colorScheme = customColorScheme, content = content)
 }
 
-class AsignarTareaFragment : Fragment() {
+// 4. La clase 'Fragment' ha sido eliminada. La data class puede vivir a nivel de archivo.
+private data class Usuario(val uid: String, val nombre: String)
 
-    private val db = FirebaseFirestore.getInstance()
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AsignarTareaScreen() { // 5. Esta es ahora la función principal de tu pantalla
 
-    data class Usuario(val uid: String, val nombre: String)
+    // --- Estado (Movido desde el Fragment y el antiguo AsignarTareaUI) ---
+    val db = remember { FirebaseFirestore.getInstance() }
+    val listaUsuarios = remember { mutableStateListOf<Usuario>() }
+    var cargandoUsuarios by remember { mutableStateOf(true) }
 
-    private val listaUsuarios = mutableStateListOf<Usuario>()
-    private var uidSeleccionado: String? = null
-    private var cargandoUsuarios by mutableStateOf(true)
+    var uidSeleccionado by remember { mutableStateOf<String?>(null) }
+    var usuarioSeleccionadoNombre by remember { mutableStateOf<String?>(null) }
+    var nombreTarea by remember { mutableStateOf("") }
+    var descripcion by remember { mutableStateOf("") }
+    var expanded by remember { mutableStateOf(false) }
 
-    override fun onCreateView(
-        inflater: android.view.LayoutInflater,
-        container: android.view.ViewGroup?,
-        savedInstanceState: Bundle?
-    ): android.view.View {
-        cargarUsuarios()
-        return ComposeView(requireContext()).apply {
-            setContent {
-                CustomTaskTheme { // Usamos el tema personalizado
-                    AsignarTareaUI()
+    val contexto = LocalContext.current // 6. Reemplaza a requireContext()
+    val habilitarBoton = uidSeleccionado != null && nombreTarea.isNotBlank() && descripcion.isNotBlank()
+    val inputShape = RoundedCornerShape(12.dp)
+
+
+    // --- Lógica de Negocio (Movida desde el Fragment) ---
+
+    // 7. Cargar usuarios (se ejecuta solo una vez cuando la pantalla aparece)
+    LaunchedEffect(Unit) {
+        cargandoUsuarios = true
+        db.collection("usuarios")
+            .get()
+            .addOnSuccessListener { docs ->
+                listaUsuarios.clear()
+                for (doc in docs) {
+                    val nombre = doc.getString("nombre")
+                    if (nombre != null) {
+                        listaUsuarios.add(Usuario(doc.id, nombre))
+                    }
                 }
+                cargandoUsuarios = false
             }
-        }
+            .addOnFailureListener {
+                Toast.makeText(contexto, "Error al cargar usuarios", Toast.LENGTH_SHORT).show()
+                cargandoUsuarios = false
+            }
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    private fun AsignarTareaUI() {
-        var usuarioSeleccionadoNombre by remember { mutableStateOf<String?>(null) }
-        var nombreTarea by remember { mutableStateOf("") }
-        var descripcion by remember { mutableStateOf("") }
-        var expanded by remember { mutableStateOf(false) }
+    // 8. La función AsignarTarea ahora vive dentro del onClick del botón
 
-        val contexto = requireContext()
-        val habilitarBoton = usuarioSeleccionadoNombre != null && nombreTarea.isNotBlank() && descripcion.isNotBlank()
-
-        // Forma de Input más suave
-        val inputShape = RoundedCornerShape(12.dp)
-
+    // --- UI (Adaptada desde AsignarTareaUI) ---
+    CustomTaskTheme {
         Scaffold(
-            // 1. Título más prominente con LargeTopAppBar
             topBar = {
                 LargeTopAppBar(
                     title = {
@@ -100,12 +105,12 @@ class AsignarTareaFragment : Fragment() {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .background(MaterialTheme.colorScheme.surface) // Fondo de la pantalla
+                    .background(MaterialTheme.colorScheme.surface)
                     .padding(horizontal = 24.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
 
-                // 2. Selector de Empleado (Dropdown Moderno)
+                // 2. Selector de Empleado
                 Text(
                     text = "Empleado a asignar",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
@@ -132,7 +137,7 @@ class AsignarTareaFragment : Fragment() {
                                     Icon(Icons.Filled.ArrowDropDown, contentDescription = "Seleccionar", Modifier.menuAnchor())
                                 },
                                 leadingIcon = { Icon(Icons.Filled.Group, contentDescription = "Usuarios") },
-                                shape = inputShape, // 2. Bordes redondeados
+                                shape = inputShape,
                                 modifier = Modifier.fillMaxWidth().menuAnchor()
                             )
 
@@ -145,7 +150,7 @@ class AsignarTareaFragment : Fragment() {
                                         text = { Text(usuario.nombre) },
                                         onClick = {
                                             usuarioSeleccionadoNombre = usuario.nombre
-                                            uidSeleccionado = usuario.uid
+                                            uidSeleccionado = usuario.uid // 9. Se actualiza el estado local
                                             expanded = false
                                         }
                                     )
@@ -161,7 +166,7 @@ class AsignarTareaFragment : Fragment() {
                     onValueChange = { nombreTarea = it },
                     label = { Text("Nombre clave de la tarea") },
                     leadingIcon = { Icon(Icons.Filled.Task, contentDescription = "Tarea") },
-                    shape = inputShape, // 2. Bordes redondeados
+                    shape = inputShape,
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -171,7 +176,7 @@ class AsignarTareaFragment : Fragment() {
                     value = descripcion,
                     onValueChange = { descripcion = it },
                     label = { Text("Descripción o detalles de la tarea") },
-                    shape = inputShape, // 2. Bordes redondeados
+                    shape = inputShape,
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(min = 100.dp, max = 200.dp)
@@ -183,7 +188,30 @@ class AsignarTareaFragment : Fragment() {
                 ElevatedButton(
                     onClick = {
                         if (habilitarBoton) {
-                            asignarTarea(nombreTarea, descripcion, usuarioSeleccionadoNombre!!, contexto)
+                            // 10. Lógica de 'asignarTarea' movida directamente aquí
+                            val tarea = hashMapOf(
+                                "name" to nombreTarea,
+                                "descripcion" to descripcion,
+                                "uidAsignado" to uidSeleccionado,
+                                "nombreEmpleado" to usuarioSeleccionadoNombre,
+                                "estado" to "Pendiente",
+                                "fechaAsignacion" to System.currentTimeMillis()
+                            )
+
+                            db.collection("tareas")
+                                .add(tarea)
+                                .addOnSuccessListener {
+                                    Toast.makeText(contexto, "✅ Tarea asignada a $usuarioSeleccionadoNombre", Toast.LENGTH_SHORT).show()
+                                    // Opcional: Limpiar campos después de asignar
+                                    nombreTarea = ""
+                                    descripcion = ""
+                                    usuarioSeleccionadoNombre = null
+                                    uidSeleccionado = null
+                                    expanded = false
+                                }
+                                .addOnFailureListener {
+                                    Toast.makeText(contexto, "❌ Error al asignar tarea", Toast.LENGTH_SHORT).show()
+                                }
                         } else {
                             Toast.makeText(contexto, "Completa todos los campos y selecciona un empleado", Toast.LENGTH_SHORT).show()
                         }
@@ -192,9 +220,8 @@ class AsignarTareaFragment : Fragment() {
                         .fillMaxWidth()
                         .height(56.dp),
                     enabled = habilitarBoton,
-                    shape = inputShape, // 2. Bordes redondeados
+                    shape = inputShape,
                     elevation = ButtonDefaults.elevatedButtonElevation(4.dp)
-                    // El color ahora viene del tema (CustomPrimary = #2F78AF)
                 ) {
                     Text(
                         "Asignar Tarea",
@@ -203,52 +230,5 @@ class AsignarTareaFragment : Fragment() {
                 }
             }
         }
-    }
-
-    // --- Lógica de Negocio (sin cambios) ---
-
-    private fun cargarUsuarios() {
-        cargandoUsuarios = true
-        db.collection("usuarios")
-            .get()
-            .addOnSuccessListener { docs ->
-                listaUsuarios.clear()
-                for (doc in docs) {
-                    val nombre = doc.getString("nombre")
-                    if (nombre != null) {
-                        listaUsuarios.add(Usuario(doc.id, nombre))
-                    }
-                }
-                cargandoUsuarios = false
-            }
-            .addOnFailureListener {
-                Toast.makeText(requireContext(), "Error al cargar usuarios", Toast.LENGTH_SHORT).show()
-                cargandoUsuarios = false
-            }
-    }
-
-    private fun asignarTarea(nombreTarea: String, descripcion: String, nombreEmpleado: String, contexto: Context) {
-        if (uidSeleccionado == null) {
-            Toast.makeText(contexto, "Error interno: UID del empleado no encontrado.", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val tarea = hashMapOf(
-            "name" to nombreTarea,
-            "descripcion" to descripcion,
-            "uidAsignado" to uidSeleccionado,
-            "nombreEmpleado" to nombreEmpleado,
-            "estado" to "Pendiente",
-            "fechaAsignacion" to System.currentTimeMillis()
-        )
-
-        db.collection("tareas")
-            .add(tarea)
-            .addOnSuccessListener {
-                Toast.makeText(contexto, "✅ Tarea asignada a $nombreEmpleado", Toast.LENGTH_SHORT).show()
-            }
-            .addOnFailureListener {
-                Toast.makeText(contexto, "❌ Error al asignar tarea", Toast.LENGTH_SHORT).show()
-            }
     }
 }

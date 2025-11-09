@@ -29,11 +29,11 @@
                 android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
-            <FrameLayout
-                android:id="@+id/fragment_containerA"
+            <androidx.compose.ui.platform.ComposeView
+                android:id="@+id/compose_nav_host_container"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"/>
+                android:layout_weight="1" />
 
             <com.google.android.material.bottomnavigation.BottomNavigationView
                 android:id="@+id/bottom_nav_view"

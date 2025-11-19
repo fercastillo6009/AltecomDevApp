@@ -46,7 +46,7 @@ fun CrearUsuarioScreen() { // 3. Función renombrada (antes AdminUserRegistratio
     val coroutineScope = rememberCoroutineScope()
 
     // Roles disponibles definidos por el usuario
-    val roles = listOf("admin", "empleado")
+    val roles = listOf("admin", "empleado", "soporte") // <-- ¡CAMBIO 1: Rol "soporte" AÑADIDO!
 
     /**
      * Función que maneja el registro en Auth y la base de datos en Firestore.
@@ -76,7 +76,7 @@ fun CrearUsuarioScreen() { // 3. Función renombrada (antes AdminUserRegistratio
                     val userData = hashMapOf(
                         "correo" to email,
                         "nombre" to name,
-                        "rol" to selectedRole
+                        "rol" to selectedRole // Esto guardará "soporte" sin problemas
                     )
 
                     // Guarda el documento en "usuarios/{UID_DEL_NUEVO_USUARIO}"
@@ -122,7 +122,8 @@ fun CrearUsuarioScreen() { // 3. Función renombrada (antes AdminUserRegistratio
             )
 
             Text(
-                text = "Crea una nueva cuenta de usuario y asigna su rol (Admin/Empleado).",
+                // <-- ¡CAMBIO 2: Texto descriptivo ACTUALIZADO!
+                text = "Crea una nueva cuenta de usuario y asigna su rol (Admin/Empleado/Soporte).",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = 24.dp)
@@ -199,6 +200,7 @@ fun CrearUsuarioScreen() { // 3. Función renombrada (antes AdminUserRegistratio
                     onDismissRequest = { isDropdownExpanded = false },
                     modifier = Modifier.fillMaxWidth(0.9f) // El menú no debe ser más ancho que su contenedor
                 ) {
+                    // El bucle "forEach" incluirá automáticamente "soporte"
                     roles.forEach { role ->
                         DropdownMenuItem(
                             text = { Text(role.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }) },

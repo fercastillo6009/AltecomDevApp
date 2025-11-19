@@ -8,6 +8,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.fondodepantalla.screens.*
 
+// --- ¡NUEVO! Importa la pantalla de monitoreo ---
+// (Asegúrate de que esta ruta sea correcta a donde guardaste MonitorScreen.kt)
+import com.example.fondodepantalla.ui.screens.MonitorScreen
+
 /**
  * Define todas las rutas de navegación de la app.
  * Este NavHost reemplaza al 'FrameLayout' y a todas las 'FragmentTransactions'.
@@ -33,6 +37,13 @@ fun AppNavHost(
             ResumenScreen()
         }
 
+        // --- ¡NUEVO! Añade la ruta para el monitor ---
+        // La MainActivity se encarga de que solo el admin pueda
+        // navegar aquí.
+        composable("monitor_empleados") {
+            MonitorScreen()
+        }
+
         // --- Rutas de Empleado ---
         // (Usan las mismas pantallas, pero con rutas de inicio diferentes)
         composable("inicio_empleado") {
@@ -49,6 +60,20 @@ fun AppNavHost(
                 }
             )
         }
+
+        // --- ¡AQUÍ ESTÁ EL CAMBIO! ---
+        // --- Ruta de Soporte ---
+        composable("lista_soporte") {
+            SoporteScreen(
+                onServiceNavigate = { serviceId ->
+                    // El rol "soporte" usa la MISMA pantalla de detalle que "empleado".
+                    // Asumimos que 'serviceId' (tu 'Numero_servicio') es el ID
+                    // del documento que 'RegistrarAdminScreen' espera.
+                    navController.navigate("registrar_admin/$serviceId")
+                }
+            )
+        }
+        // --- FIN DEL CAMBIO ---
 
         // --- Rutas Compartidas (Admin y Empleado) ---
         composable("perfil") { // 'PerfilAdmin' ahora es solo 'perfil'

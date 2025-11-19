@@ -1,6 +1,7 @@
 package com.example.fondodepantalla.screens // 1. Paquete actualizado
 
 import android.widget.Toast
+import androidx.compose.foundation.Image // <-- ¡IMPORTACIÓN AÑADIDA!
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -22,10 +23,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 /**
  * Muestra la lista de tareas asignadas al administrador.
- *
- * @param onTaskNavigate Una función lambda que se invoca cuando el usuario
- * selecciona una tarea, pasando el ID de la tarea
- * para que el sistema de navegación principal se encargue.
+ * (Función principal 'ListaAdminScreen' sin cambios)
  */
 @Composable
 fun ListaAdminScreen(
@@ -106,43 +104,76 @@ private fun TaskCard( // 6. Hecho privado, ya que solo se usa en esta pantalla
     var isTaken by remember { mutableStateOf(task.isTaken) }
     val uid = FirebaseAuth.getInstance().currentUser?.uid
 
+    // --- ¡AQUÍ ESTÁ LA LÓGICA DEL LOGO AÑADIDA! ---
+    // 1. Obtiene la primera palabra del nombre de la TAREA
+    val firstWord = task.name // Usamos 'task.name' como fuente
+        ?.trim()
+        ?.split(" ")
+        ?.firstOrNull()
+        ?.lowercase()
+        ?: "default"
+
+    // 2. Decide qué recurso (logo) usar
+    val logoResId = when (firstWord) {
+        "oxxo" -> R.drawable.logo_oxxo
+        "seven" -> R.drawable.logo_seven
+        "circlek" -> R.drawable.logo_alsuper
+        // --- Agrega más empresas aquí ---
+
+        else -> null // Si no se encuentra, usará el logo por defecto
+    }
+    // --- FIN DE LA LÓGICA DEL LOGO ---
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 6.dp, horizontal = 12.dp)
-            // 7. El click de la tarjeta también usa el lambda
             .clickable { if (task.user == uid) onTaskClick(task) },
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Row(
             modifier = Modifier
-                .background(Color.White) // Considera MaterialTheme.colorScheme.surface
+                .background(Color.White)
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_task),
-                contentDescription = null,
-                modifier = Modifier.size(48.dp),
-                tint = Color.Unspecified
-            )
+
+            // --- ¡CAMBIO EN EL ICONO! ---
+            if (logoResId != null) {
+                // Hay un logo personalizado, usamos 'Image' para ver el color
+                Image(
+                    painter = painterResource(id = logoResId),
+                    contentDescription = task.name,
+                    modifier = Modifier.size(48.dp)
+                )
+            } else {
+                // No hay logo, usa el 'Icon' de tarea por defecto
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_task),
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp),
+                    tint = Color.Unspecified // Mantenemos tu 'tint' original
+                )
+            }
+            // --- FIN DEL CAMBIO ---
+
             Spacer(modifier = Modifier.width(16.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = task.name ?: "Sin nombre",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color.Black // Considera MaterialTheme.colorScheme.onSurface
+                    color = Color.Black
                 )
                 Text(
                     text = task.descripcion ?: "Sin descripción",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray, // Considera MaterialTheme.colorScheme.onSurfaceVariant
+                    color = Color.Gray,
                     maxLines = 2
                 )
             }
 
-            // El Switch permite "tomar" o "soltar" la tarea
+            // El Switch (sin cambios)
             Switch(
                 checked = isTaken,
                 onCheckedChange = { checked ->
@@ -152,7 +183,6 @@ private fun TaskCard( // 6. Hecho privado, ya que solo se usa en esta pantalla
                             .update("taken", true, "user", uid)
                             .addOnSuccessListener {
                                 isTaken = true
-                                // 8. Navega a la tarea en cuanto la toma
                                 onTaskClick(task)
                             }
                             .addOnFailureListener {
@@ -167,7 +197,6 @@ private fun TaskCard( // 6. Hecho privado, ya que solo se usa en esta pantalla
                                 Toast.makeText(context, "Error al liberar tarea", Toast.LENGTH_SHORT).show()
                             }
                     } else {
-                        // Evita que un admin libere la tarea de otro
                         Toast.makeText(context, "No puedes liberar esta tarea", Toast.LENGTH_SHORT).show()
                         isTaken = true
                     }
